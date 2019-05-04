@@ -1,4 +1,4 @@
-package com.jordantymburski.stopplaying;
+package com.jordantymburski.driftoff;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.jordantymburski.stopplaying;
+package com.jordantymburski.driftoff;
 
 import android.app.Activity;
 import android.app.AlarmManager;

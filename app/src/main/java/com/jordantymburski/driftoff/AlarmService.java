@@ -1,4 +1,4 @@
-package com.jordantymburski.stopplaying;
+package com.jordantymburski.driftoff;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
@@ -13,7 +13,7 @@ public class AlarmService extends JobService {
         if (am != null) {
             am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         } else {
-            Log.e("StopPlaying",
+            Log.e("DriftOff",
                     "Failed to get the audio manager to gain focus of the audio system!");
         }
         return false;

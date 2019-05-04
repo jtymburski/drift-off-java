@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Stop Playing</string>
+    <string name="app_name">Drift Off</string>
     <!-- TODO: MAKE PLURAL -->
     <string name="alarm_fires">Music will shut off in %d minutes</string>
 </resources>
