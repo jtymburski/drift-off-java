@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="alarm_notice">
+        <item quantity="one">Music will shut off in %d minute</item>
+        <item quantity="other">Music will shut off in %d minutes</item>
+    </plurals>
+</resources>

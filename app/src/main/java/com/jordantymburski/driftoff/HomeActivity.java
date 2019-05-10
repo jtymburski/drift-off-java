@@ -156,8 +156,9 @@ public class HomeActivity extends Activity
             updateUI();
 
             // Determine when it will fire
-            Toast.makeText(this, getString(R.string.alarm_fires,
-                    firesInMillis / TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES)),
+            long minutesToStop = TimeUnit.MILLISECONDS.toMinutes(firesInMillis);
+            Toast.makeText(this, getResources().getQuantityString(
+                        R.plurals.alarm_notice, (int) minutesToStop, minutesToStop),
                     Toast.LENGTH_LONG).show();
         }
     }
