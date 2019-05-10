@@ -36,7 +36,7 @@ public class HomeActivity extends Activity
     private PendingIntent mAlarmIntent;
 
     // Preference storage editor
-    SharedPreferences mPreferenceStorage;
+    private SharedPreferences mPreferenceStorage;
 
     // Time setting
     private int mTimeHour = DEFAULT_HOUR;
