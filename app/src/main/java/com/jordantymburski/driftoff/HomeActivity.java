@@ -45,6 +45,7 @@ public class HomeActivity extends Activity
 
     // UI
     private ImageButton mButtonRun;
+    private TextView mTextPeriod;
     private TextView mTextTime;
 
     @Override
@@ -59,6 +60,7 @@ public class HomeActivity extends Activity
         // UI references
         mButtonRun = findViewById(R.id.run_button);
         mButtonRun.setOnClickListener(this);
+        mTextPeriod = findViewById(R.id.time_period);
         mTextTime = findViewById(R.id.time_text);
         mTextTime.setOnClickListener(this);
 
@@ -177,7 +179,13 @@ public class HomeActivity extends Activity
         c.set(Calendar.HOUR_OF_DAY, mTimeHour);
         c.set(Calendar.MINUTE, mTimeMinute);
         c.set(Calendar.SECOND, 0);
-        mTextTime.setText(DateFormat.getTimeFormat(this).format(c.getTime()));
+        if(DateFormat.is24HourFormat(this)) {
+            mTextTime.setText(DateFormat.getTimeFormat(this).format(c.getTime()));
+            mTextPeriod.setText(null);
+        } else {
+            mTextTime.setText(DateFormat.format("h:m", c));
+            mTextPeriod.setText(DateFormat.format("a", c));
+        }
 
         // Color based on if its active or not
         mTextTime.setTextColor(
