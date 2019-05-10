@@ -11,6 +11,12 @@ import android.os.Build;
 import android.util.Log;
 
 public class AlarmService extends JobService {
+    private static final String LOG_TAG = JobService.class.getSimpleName();
+
+    /* ==============================================
+     * JobService OVERRIDES
+     * ============================================== */
+
     @Override
     public boolean onStartJob(JobParameters params) {
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -21,7 +27,7 @@ public class AlarmService extends JobService {
                 requestAudioFocusLegacy(am);
             }
         } else {
-            Log.e("DriftOff",
+            Log.e(LOG_TAG,
                     "Failed to get the audio manager to gain focus of the audio system!");
         }
         return false;
