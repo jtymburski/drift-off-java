@@ -74,6 +74,16 @@ public class HomeActivity extends Activity
         mTimeMinute = mPreferenceStorage.getInt(PREFERENCE_MINUTE, DEFAULT_MINUTE);
         mAlarmActive = mPreferenceStorage.getLong(PREFERENCE_ALARM, 0L)
                 > System.currentTimeMillis();
+    }
+
+    /* ==============================================
+     * Activity OVERRIDES
+     * ============================================== */
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         updateUI();
     }
 
