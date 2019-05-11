@@ -59,6 +59,10 @@ class AlarmController {
      * INTERNAL FUNCTIONS
      * ============================================== */
 
+    /**
+     * Set an alarm wake up at a given time
+     * @param alarmTime alarm time, in milliseconds, correlated to System.currentTimeMillis()
+     */
     private void set(long alarmTime) {
         mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, mAlarmIntent);
         mAlarmModel.setAlarm(alarmTime);
@@ -68,15 +72,25 @@ class AlarmController {
      * FUNCTIONS
      * ============================================== */
 
+    /**
+     * Cancels any active pending alarms
+     */
     void cancel() {
         mAlarmManager.cancel(mAlarmIntent);
         mAlarmModel.setAlarm(0);
     }
 
+    /**
+     * Set an alarm wake up at the set point time chosen by the user
+     */
     void set() {
         set(mAlarmModel.getTimeInMillis());
     }
 
+    /**
+     * Call if the time was manually changed by the user. This will handle re-scheduling the alarm
+     * or triggering instantly if the time was changed past the alarm
+     */
     void timeChanged() {
         long alarmTime = mAlarmModel.getAlarm();
         if (alarmTime > 0) {
@@ -91,6 +105,9 @@ class AlarmController {
         }
     }
 
+    /**
+     * Triggers the alarm service job to stop any playing music
+     */
     void trigger() {
         mJobScheduler.schedule(mJobInfo);
         cancel();
