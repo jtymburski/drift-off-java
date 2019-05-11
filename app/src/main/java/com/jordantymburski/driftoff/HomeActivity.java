@@ -7,6 +7,7 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.WindowManager;
@@ -30,6 +31,7 @@ public class HomeActivity extends Activity
     private static final String PREFERENCE_HOUR = "lastHourSet";
     private static final String PREFERENCE_MINUTE = "lastMinuteSet";
     private static final String PREFERENCE_STORAGE = "PreferenceData";
+    private static final long UPDATE_TIME_MS = TimeUnit.SECONDS.toMillis(30);
 
     // Alarm intent
     private PendingIntent mAlarmIntent;
@@ -47,6 +49,18 @@ public class HomeActivity extends Activity
     private TextView mTextPeriod;
     private TextView mTextRemaining;
     private TextView mTextTime;
+
+    // Update runnable
+    private final Handler mHandler = new Handler();
+    private final Runnable mUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateState();
+            if (isAlarmActive()) {
+                mHandler.postDelayed(mUpdateRunnable, UPDATE_TIME_MS);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,11 +95,18 @@ public class HomeActivity extends Activity
      * ============================================== */
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        mHandler.removeCallbacks(mUpdateRunnable);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
         updateTime();
-        updateState();
+        mHandler.post(mUpdateRunnable);
     }
 
     /* ==============================================
@@ -138,7 +159,7 @@ public class HomeActivity extends Activity
             mAlarmTime = 0L;
             alarmManager.cancel(mAlarmIntent);
             mPreferenceStorage.edit().putLong(PREFERENCE_ALARM, mAlarmTime).apply();
-            updateState();
+            mHandler.post(mUpdateRunnable);
         }
     }
 
@@ -194,7 +215,7 @@ public class HomeActivity extends Activity
             alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP, mAlarmTime, mAlarmIntent);
             mPreferenceStorage.edit().putLong(PREFERENCE_ALARM, mAlarmTime).apply();
-            updateState();
+            mHandler.post(mUpdateRunnable);
         }
     }
 
