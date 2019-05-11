@@ -8,7 +8,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-class AlarmController {
+import java.lang.ref.WeakReference;
+
+class AlarmController implements AlarmListener {
     // singleton reference
     private static AlarmController mInstance;
 
@@ -18,6 +20,7 @@ class AlarmController {
     private final AlarmData mAlarmModel;
     private final JobInfo mJobInfo;
     private final JobScheduler mJobScheduler;
+    private WeakReference<AlarmListener> mListener;
 
     /* ==============================================
      * CONSTRUCTOR
@@ -56,6 +59,17 @@ class AlarmController {
     }
 
     /* ==============================================
+     * AlarmListener OVERRIDES
+     * ============================================== */
+
+    @Override
+    public void alarmOff() {
+        if (mListener != null && mListener.get() != null) {
+            mListener.get().alarmOff();
+        }
+    }
+
+    /* ==============================================
      * INTERNAL FUNCTIONS
      * ============================================== */
 
@@ -73,11 +87,27 @@ class AlarmController {
      * ============================================== */
 
     /**
+     * Add a listener for alarm events
+     * @param listener the listener connection
+     */
+    void addListener(AlarmListener listener) {
+        mListener = new WeakReference<>(listener);
+    }
+
+    /**
      * Cancels any active pending alarms
      */
     void cancel() {
         mAlarmManager.cancel(mAlarmIntent);
         mAlarmModel.setAlarm(0);
+        alarmOff();
+    }
+
+    /**
+     * Removes any tied listener for alarm events
+     */
+    void removeListener() {
+        mListener = null;
     }
 
     /**

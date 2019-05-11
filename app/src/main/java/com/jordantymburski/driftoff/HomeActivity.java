@@ -19,7 +19,8 @@ import java.util.concurrent.TimeUnit;
  * status bar and navigation/system bar) with user interaction.
  */
 public class HomeActivity extends Activity
-        implements View.OnClickListener,
+        implements AlarmListener,
+                   View.OnClickListener,
                    TimePickerDialog.OnTimeSetListener {
     private static final long UPDATE_TIME_MS = TimeUnit.SECONDS.toMillis(30);
 
@@ -84,13 +85,24 @@ public class HomeActivity extends Activity
         super.onPause();
 
         mHandler.removeCallbacks(mUpdateRunnable);
+        mAlarmController.removeListener();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        mAlarmController.addListener(this);
         updateTime();
+        mHandler.post(mUpdateRunnable);
+    }
+
+    /* ==============================================
+     * AlarmListener OVERRIDES
+     * ============================================== */
+
+    @Override
+    public void alarmOff() {
         mHandler.post(mUpdateRunnable);
     }
 
