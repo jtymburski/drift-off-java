@@ -45,7 +45,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
             android:textAllCaps="true"
-            android:textColor="@color/colorTextActive"
+            android:textColor="@color/textActive"
             tools:text="Stops music in 6 hours" />
     </RelativeLayout>
 

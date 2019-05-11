@@ -22,6 +22,8 @@ public class HomeActivity extends Activity
         implements AlarmListener,
                    View.OnClickListener,
                    TimePickerDialog.OnTimeSetListener {
+    private static final long DAY_START_HOUR = 8; // 8:00am inclusive
+    private static final long DAY_END_HOUR = 18; // 6:00pm inclusive
     private static final long UPDATE_TIME_MS = TimeUnit.SECONDS.toMillis(30);
 
     // Controller and model
@@ -38,6 +40,9 @@ public class HomeActivity extends Activity
     private TextView mTextRemaining;
     private TextView mTextTime;
 
+    // UI theme
+    private int mTheme;
+
     // Update runnable
     private final Handler mHandler = new Handler();
     private final Runnable mUpdateRunnable = new Runnable() {
@@ -53,6 +58,9 @@ public class HomeActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mTheme = getThemeResource();
+        setTheme(mTheme);
         setContentView(R.layout.activity_home);
 
         // Full screen under the status bar at the top and nav bar at the bottom
@@ -64,8 +72,8 @@ public class HomeActivity extends Activity
         mAlarmModel = AlarmData.getInstance(this);
 
         // Colors
-        mColorTextActive = getColor(R.color.colorTextActive);
-        mColorTextEdit = getColor(R.color.colorTextEdit);
+        mColorTextActive = getColor(R.color.textActive);
+        mColorTextEdit = getColor(R.color.textEdit);
 
         // UI references
         mButtonRun = findViewById(R.id.run_button);
@@ -92,6 +100,13 @@ public class HomeActivity extends Activity
     public void onResume() {
         super.onResume();
 
+        // Check that the theme is still correct
+        if (mTheme != getThemeResource()) {
+            recreate();
+            return;
+        }
+
+        // Otherwise, proceed to set-up and show the UI
         mAlarmController.addListener(this);
         updateTime();
         mHandler.post(mUpdateRunnable);
@@ -157,6 +172,16 @@ public class HomeActivity extends Activity
         new TimePickerDialog(this, this,
                 mAlarmModel.getTimeHour(), mAlarmModel.getTimeMinute(),
                 DateFormat.is24HourFormat(getApplicationContext())).show();
+    }
+
+    /**
+     * Determines the theme resource that should be used
+     * @return style resource ID
+     */
+    private int getThemeResource() {
+        int hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        return (hourOfDay >= DAY_START_HOUR && hourOfDay <= DAY_END_HOUR)
+                ? R.style.AppTheme_Light : R.style.AppTheme;
     }
 
     /**
