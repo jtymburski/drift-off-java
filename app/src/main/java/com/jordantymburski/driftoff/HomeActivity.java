@@ -1,11 +1,7 @@
 package com.jordantymburski.driftoff;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateFormat;
@@ -25,28 +21,15 @@ import java.util.concurrent.TimeUnit;
 public class HomeActivity extends Activity
         implements View.OnClickListener,
                    TimePickerDialog.OnTimeSetListener {
-    private static final int DEFAULT_HOUR = 21;
-    private static final int DEFAULT_MINUTE = 30;
-    private static final String PREFERENCE_ALARM = "lastAlarm";
-    private static final String PREFERENCE_HOUR = "lastHourSet";
-    private static final String PREFERENCE_MINUTE = "lastMinuteSet";
-    private static final String PREFERENCE_STORAGE = "PreferenceData";
     private static final long UPDATE_TIME_MS = TimeUnit.SECONDS.toMillis(30);
 
-    // Alarm intent
-    private PendingIntent mAlarmIntent;
-    private long mAlarmTime = 0;
+    // Controller and model
+    private AlarmController mAlarmController;
+    private AlarmData mAlarmModel;
 
     // Colors
     private int mColorTextActive;
     private int mColorTextEdit;
-
-    // Preference storage editor
-    private SharedPreferences mPreferenceStorage;
-
-    // Time setting
-    private int mTimeHour = DEFAULT_HOUR;
-    private int mTimeMinute = DEFAULT_MINUTE;
 
     // UI
     private ImageButton mButtonRun;
@@ -60,7 +43,7 @@ public class HomeActivity extends Activity
         @Override
         public void run() {
             updateState();
-            if (isAlarmActive()) {
+            if (mAlarmModel.isActive()) {
                 mHandler.postDelayed(mUpdateRunnable, UPDATE_TIME_MS);
             }
         }
@@ -75,6 +58,14 @@ public class HomeActivity extends Activity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
+        // Initialize model and controller references
+        mAlarmController = AlarmController.getInstance(this);
+        mAlarmModel = AlarmData.getInstance(this);
+
+        // Colors
+        mColorTextActive = getColor(R.color.colorTextActive);
+        mColorTextEdit = getColor(R.color.colorTextEdit);
+
         // UI references
         mButtonRun = findViewById(R.id.run_button);
         mButtonRun.setOnClickListener(this);
@@ -82,20 +73,6 @@ public class HomeActivity extends Activity
         mTextRemaining = findViewById(R.id.time_remaining);
         mTextTime = findViewById(R.id.time_text);
         mTextTime.setOnClickListener(this);
-
-        // Colors
-        mColorTextActive = getColor(R.color.colorTextActive);
-        mColorTextEdit = getColor(R.color.colorTextEdit);
-
-        // The alarm pending intent
-        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
-        mAlarmIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
-
-        // Fetch the stored information;
-        mPreferenceStorage = getSharedPreferences(PREFERENCE_STORAGE, 0);
-        mTimeHour = mPreferenceStorage.getInt(PREFERENCE_HOUR, DEFAULT_HOUR);
-        mTimeMinute = mPreferenceStorage.getInt(PREFERENCE_MINUTE, DEFAULT_MINUTE);
-        mAlarmTime = mPreferenceStorage.getLong(PREFERENCE_ALARM, 0L);
     }
 
     /* ==============================================
@@ -125,14 +102,14 @@ public class HomeActivity extends Activity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.run_button:
-                if (isAlarmActive()) {
+                if (mAlarmModel.isActive()) {
                     cancelAlarm();
                 } else {
                     scheduleAlarm();
                 }
                 break;
             case R.id.time_text:
-                if (!isAlarmActive()) {
+                if (!mAlarmModel.isActive()) {
                     editTime();
                 }
                 break;
@@ -145,12 +122,7 @@ public class HomeActivity extends Activity
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        mTimeHour = hourOfDay;
-        mTimeMinute = minute;
-        mPreferenceStorage.edit()
-                .putInt(PREFERENCE_HOUR, mTimeHour)
-                .putInt(PREFERENCE_MINUTE, mTimeMinute)
-                .apply();
+        mAlarmModel.setTime(hourOfDay, minute);
         updateTime();
     }
 
@@ -162,44 +134,17 @@ public class HomeActivity extends Activity
      * Cancel a scheduled alarm
      */
     private void cancelAlarm() {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        if (alarmManager != null) {
-            mAlarmTime = 0L;
-            alarmManager.cancel(mAlarmIntent);
-            mPreferenceStorage.edit().putLong(PREFERENCE_ALARM, mAlarmTime).apply();
-            mHandler.post(mUpdateRunnable);
-        }
+        mAlarmController.cancel();
+        mHandler.post(mUpdateRunnable);
     }
 
     /**
      * Edit the alarm time
      */
     private void editTime() {
-        new TimePickerDialog(this, this, mTimeHour, mTimeMinute,
+        new TimePickerDialog(this, this,
+                mAlarmModel.getTimeHour(), mAlarmModel.getTimeMinute(),
                 DateFormat.is24HourFormat(getApplicationContext())).show();
-    }
-
-    /**
-     * Determines if the alarm is currently active and running to stop music in a fixed time
-     * @return TRUE if active. FALSE if off
-     */
-    private boolean isAlarmActive() {
-        return (mAlarmTime > System.currentTimeMillis());
-    }
-
-    /**
-     * Creates a calendar representation of when the alarm is expected to trigger
-     * @return the calendar alarm time, as per the time setpoint
-     */
-    private Calendar getAlarmTime() {
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, mTimeHour);
-        c.set(Calendar.MINUTE, mTimeMinute);
-        c.set(Calendar.SECOND, 0);
-        if (c.getTimeInMillis() <= System.currentTimeMillis()) {
-            c.add(Calendar.DAY_OF_MONTH, 1);
-        }
-        return c;
     }
 
     /**
@@ -207,21 +152,15 @@ public class HomeActivity extends Activity
      * @return time remaining text
      */
     private String getTimeTextRemaining() {
-        long millisToStop = mAlarmTime - System.currentTimeMillis();
-
         // Check if it should display in hours
-        // This is rounded up: 1 to 60 minutes = 1 hour, 61 to 120 minutes  = 2 hours, etc
-        long hoursToStop = TimeUnit.MILLISECONDS.toHours(
-                millisToStop + TimeUnit.HOURS.toMillis(1) - 1);
+        long hoursToStop = mAlarmModel.getHoursTillAlarm();
         if (hoursToStop > 1) {
             return getResources().getQuantityString(
                     R.plurals.alarm_notice_hours, (int) hoursToStop, hoursToStop);
         }
 
         // Otherwise, it should display in minutes
-        // This is rounded up: 1 to 60 seconds = 1 minute, 61 to 120 seconds = 2 minutes, etc
-        long minutesToStop = TimeUnit.MILLISECONDS.toMinutes(
-                millisToStop + TimeUnit.MINUTES.toMillis(1) - 1);
+        long minutesToStop = mAlarmModel.getMinutesTillAlarm();
         return getResources().getQuantityString(
                 R.plurals.alarm_notice_minutes, (int) minutesToStop, minutesToStop);
     }
@@ -230,21 +169,15 @@ public class HomeActivity extends Activity
      * Schedule the alarm to go off
      */
     private void scheduleAlarm() {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        if (alarmManager != null) {
-            mAlarmTime = getAlarmTime().getTimeInMillis();
-            alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP, mAlarmTime, mAlarmIntent);
-            mPreferenceStorage.edit().putLong(PREFERENCE_ALARM, mAlarmTime).apply();
-            mHandler.post(mUpdateRunnable);
-        }
+        mAlarmController.set();
+        mHandler.post(mUpdateRunnable);
     }
 
     /**
      * Updates the active state
      */
     private void updateState() {
-        if (isAlarmActive()) {
+        if (mAlarmModel.isActive()) {
             mButtonRun.setImageResource(R.drawable.ic_stop);
             mTextTime.setTextColor(mColorTextActive);
             mTextPeriod.setTextColor(mColorTextActive);
@@ -261,7 +194,7 @@ public class HomeActivity extends Activity
      * Updates the time setting displayed in the UI
      */
     private void updateTime() {
-        Calendar alarmTime = getAlarmTime();
+        Calendar alarmTime = mAlarmModel.getTime();
         if(DateFormat.is24HourFormat(getApplicationContext())) {
             mTextTime.setText(
                     DateFormat.getTimeFormat(getApplicationContext()).format(alarmTime.getTime()));
