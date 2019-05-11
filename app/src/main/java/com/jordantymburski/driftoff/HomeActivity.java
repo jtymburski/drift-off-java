@@ -37,6 +37,10 @@ public class HomeActivity extends Activity
     private PendingIntent mAlarmIntent;
     private long mAlarmTime = 0;
 
+    // Colors
+    private int mColorTextActive;
+    private int mColorTextEdit;
+
     // Preference storage editor
     private SharedPreferences mPreferenceStorage;
 
@@ -78,6 +82,10 @@ public class HomeActivity extends Activity
         mTextRemaining = findViewById(R.id.time_remaining);
         mTextTime = findViewById(R.id.time_text);
         mTextTime.setOnClickListener(this);
+
+        // Colors
+        mColorTextActive = getColor(R.color.colorTextActive);
+        mColorTextEdit = getColor(R.color.colorTextEdit);
 
         // The alarm pending intent
         Intent alarmIntent = new Intent(this, AlarmReceiver.class);
@@ -238,12 +246,14 @@ public class HomeActivity extends Activity
     private void updateState() {
         if (isAlarmActive()) {
             mButtonRun.setImageResource(R.drawable.ic_stop);
+            mTextTime.setTextColor(mColorTextActive);
+            mTextPeriod.setTextColor(mColorTextActive);
             mTextRemaining.setText(getTimeTextRemaining());
-            mTextTime.setTextColor(getColor(R.color.colorTextActive));
         } else {
             mButtonRun.setImageResource(R.drawable.ic_play);
+            mTextTime.setTextColor(mColorTextEdit);
+            mTextPeriod.setTextColor(mColorTextEdit);
             mTextRemaining.setText(null);
-            mTextTime.setTextColor(getColor(R.color.colorTextEdit));
         }
     }
 
