@@ -199,10 +199,23 @@ public class HomeActivity extends Activity
      * @return time remaining text
      */
     private String getTimeTextRemaining() {
+        long millisToStop = mAlarmTime - System.currentTimeMillis();
+
+        // Check if it should display in hours
+        // This is rounded up: 1 to 60 minutes = 1 hour, 61 to 120 minutes  = 2 hours, etc
+        long hoursToStop = TimeUnit.MILLISECONDS.toHours(
+                millisToStop + TimeUnit.HOURS.toMillis(1) - 1);
+        if (hoursToStop > 1) {
+            return getResources().getQuantityString(
+                    R.plurals.alarm_notice_hours, (int) hoursToStop, hoursToStop);
+        }
+
+        // Otherwise, it should display in minutes
+        // This is rounded up: 1 to 60 seconds = 1 minute, 61 to 120 seconds = 2 minutes, etc
         long minutesToStop = TimeUnit.MILLISECONDS.toMinutes(
-                mAlarmTime - System.currentTimeMillis());
+                millisToStop + TimeUnit.MINUTES.toMillis(1) - 1);
         return getResources().getQuantityString(
-                R.plurals.alarm_notice, (int) minutesToStop, minutesToStop);
+                R.plurals.alarm_notice_minutes, (int) minutesToStop, minutesToStop);
     }
 
     /**
