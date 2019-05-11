@@ -36,6 +36,17 @@
             android:textColor="@android:color/white"
             android:textSize="18sp"
             tools:text="pm" />
+
+        <TextView
+            android:id="@+id/time_remaining"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/time_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:textAllCaps="true"
+            android:textColor="@color/colorTextActive"
+            tools:text="Stops music in 6 hours" />
     </RelativeLayout>
 
     <FrameLayout
