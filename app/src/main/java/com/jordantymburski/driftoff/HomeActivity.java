@@ -237,7 +237,7 @@ public class HomeActivity extends Activity
                     DateFormat.getTimeFormat(getApplicationContext()).format(alarmTime.getTime()));
             mTextPeriod.setText(null);
         } else {
-            mTextTime.setText(DateFormat.format("h:m", alarmTime));
+            mTextTime.setText(DateFormat.format("h:mm", alarmTime));
             mTextPeriod.setText(DateFormat.format("a", alarmTime));
         }
     }
