@@ -238,7 +238,8 @@ public class HomeActivity extends Activity
             mTextPeriod.setText(null);
         } else {
             mTextTime.setText(DateFormat.format("h:mm", alarmTime));
-            mTextPeriod.setText(DateFormat.format("a", alarmTime));
+            mTextPeriod.setText(DateFormat.format("a", alarmTime).toString()
+                    .replace(".", ""));
         }
     }
 }

@@ -32,6 +32,7 @@
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@+id/time_text"
             android:fontFamily="sans-serif-light"
+            android:letterSpacing="0.15"
             android:textAllCaps="true"
             android:textColor="@android:color/white"
             android:textSize="18sp"
@@ -44,6 +45,7 @@
             android:layout_below="@+id/time_text"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
+            android:letterSpacing="0.1"
             android:textAllCaps="true"
             android:textColor="@color/textActive"
             tools:text="Stops music in 6 hours" />
