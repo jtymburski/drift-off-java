@@ -1,6 +1,5 @@
-package com.jordantymburski.driftoff;
+package com.jordantymburski.driftoff.presentation;
 
-import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,6 +10,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
+
+import com.jordantymburski.driftoff.R;
+import com.jordantymburski.driftoff.domain.model.AlarmInfo;
+
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
@@ -18,21 +24,21 @@ import java.util.concurrent.TimeUnit;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class HomeActivity extends Activity
-        implements AlarmListener,
+public class HomeActivity extends FragmentActivity
+        implements Observer<AlarmInfo>,
                    View.OnClickListener,
                    TimePickerDialog.OnTimeSetListener {
     private static final long DAY_START_HOUR = 8; // 8:00am inclusive
     private static final long DAY_END_HOUR = 18; // 6:00pm inclusive
     private static final long UPDATE_TIME_MS = TimeUnit.SECONDS.toMillis(30);
 
-    // Controller and model
-    private AlarmController mAlarmController;
-    private AlarmData mAlarmModel;
-
     // Colors
     private int mColorTextActive;
     private int mColorTextEdit;
+
+    // Model
+    private HomeViewModel mModel;
+    private AlarmInfo mModelInfo;
 
     // UI
     private ImageButton mButtonRun;
@@ -49,7 +55,7 @@ public class HomeActivity extends Activity
         @Override
         public void run() {
             updateState();
-            if (mAlarmModel.isActive()) {
+            if (mModelInfo.isActive()) {
                 mHandler.postDelayed(mUpdateRunnable, UPDATE_TIME_MS);
             }
         }
@@ -67,10 +73,6 @@ public class HomeActivity extends Activity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
-        // Initialize model and controller references
-        mAlarmController = AlarmController.getInstance(this);
-        mAlarmModel = AlarmData.getInstance(this);
-
         // Colors
         mColorTextActive = getColor(R.color.textActive);
         mColorTextEdit = getColor(R.color.textEdit);
@@ -82,18 +84,21 @@ public class HomeActivity extends Activity
         mTextRemaining = findViewById(R.id.time_remaining);
         mTextTime = findViewById(R.id.time_text);
         mTextTime.setOnClickListener(this);
+
+        // Initialize the view model and set up the observable
+        mModel = HomeViewModel.getInstance(this, getApplication());
+        mModel.getInfoObservable().observe(this, this);
     }
 
-    /* ==============================================
+    /* ----------------------------------------------
      * Activity OVERRIDES
-     * ============================================== */
+     * ---------------------------------------------- */
 
     @Override
     public void onPause() {
         super.onPause();
 
         mHandler.removeCallbacks(mUpdateRunnable);
-        mAlarmController.removeListener();
     }
 
     @Override
@@ -106,71 +111,69 @@ public class HomeActivity extends Activity
             return;
         }
 
-        // Otherwise, proceed to set-up and show the UI
-        mAlarmController.addListener(this);
-        updateTime();
-        mHandler.post(mUpdateRunnable);
+        // Otherwise, proceed to update the UI
+        onChanged(mModelInfo);
     }
 
-    /* ==============================================
-     * AlarmListener OVERRIDES
-     * ============================================== */
+    /* ----------------------------------------------
+     * Observer OVERRIDES
+     * ---------------------------------------------- */
 
     @Override
-    public void alarmOff() {
-        mHandler.post(mUpdateRunnable);
+    public void onChanged(@Nullable AlarmInfo info) {
+        if (info != null && !info.equals(mModelInfo)) {
+            final boolean firstTime = (mModelInfo == null);
+            mModelInfo = info;
+
+            if (firstTime) {
+                updateTime();
+            }
+            mHandler.post(mUpdateRunnable);
+        }
     }
 
-    /* ==============================================
+    /* ----------------------------------------------
      * OnClickListener OVERRIDES
-     * ============================================== */
+     * ---------------------------------------------- */
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.run_button:
-                if (mAlarmModel.isActive()) {
-                    cancelAlarm();
+                if (mModelInfo.isActive()) {
+                    mModel.resetAlarm();
                 } else {
-                    scheduleAlarm();
+                    mModel.setAlarm();
                 }
                 break;
             case R.id.time_text:
-                if (!mAlarmModel.isActive()) {
+                if (!mModelInfo.isActive()) {
                     editTime();
                 }
                 break;
         }
     }
 
-    /* ==============================================
+    /* ----------------------------------------------
      * OnTimeSetListener OVERRIDES
-     * ============================================== */
+     * ---------------------------------------------- */
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        mAlarmModel.setTime(hourOfDay, minute);
+        mModel.setTime(hourOfDay, minute);
         updateTime();
     }
 
-    /* ==============================================
+    /* ----------------------------------------------
      * PRIVATE FUNCTIONS
-     * ============================================== */
-
-    /**
-     * Cancel a scheduled alarm
-     */
-    private void cancelAlarm() {
-        mAlarmController.cancel();
-        mHandler.post(mUpdateRunnable);
-    }
+     * ---------------------------------------------- */
 
     /**
      * Edit the alarm time
      */
     private void editTime() {
         new TimePickerDialog(this, this,
-                mAlarmModel.getTimeHour(), mAlarmModel.getTimeMinute(),
+                mModelInfo.timeHour, mModelInfo.timeMinute,
                 DateFormat.is24HourFormat(getApplicationContext())).show();
     }
 
@@ -190,31 +193,23 @@ public class HomeActivity extends Activity
      */
     private String getTimeTextRemaining() {
         // Check if it should display in hours
-        long hoursToStop = mAlarmModel.getHoursTillAlarm();
+        long hoursToStop = mModelInfo.getHoursTillAlarm();
         if (hoursToStop > 1) {
             return getResources().getQuantityString(
                     R.plurals.alarm_notice_hours, (int) hoursToStop, hoursToStop);
         }
 
         // Otherwise, it should display in minutes
-        long minutesToStop = mAlarmModel.getMinutesTillAlarm();
+        long minutesToStop = mModelInfo.getMinutesTillAlarm();
         return getResources().getQuantityString(
                 R.plurals.alarm_notice_minutes, (int) minutesToStop, minutesToStop);
-    }
-
-    /**
-     * Schedule the alarm to go off
-     */
-    private void scheduleAlarm() {
-        mAlarmController.set();
-        mHandler.post(mUpdateRunnable);
     }
 
     /**
      * Updates the active state
      */
     private void updateState() {
-        if (mAlarmModel.isActive()) {
+        if (mModelInfo.isActive()) {
             mButtonRun.setImageResource(R.drawable.ic_stop);
             mTextTime.setTextColor(mColorTextActive);
             mTextPeriod.setTextColor(mColorTextActive);
@@ -231,7 +226,7 @@ public class HomeActivity extends Activity
      * Updates the time setting displayed in the UI
      */
     private void updateTime() {
-        Calendar alarmTime = mAlarmModel.getTime();
+        Calendar alarmTime = mModelInfo.getTime();
         if(DateFormat.is24HourFormat(getApplicationContext())) {
             mTextTime.setText(
                     DateFormat.getTimeFormat(getApplicationContext()).format(alarmTime.getTime()));
