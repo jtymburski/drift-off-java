@@ -4,11 +4,17 @@ import android.content.Context;
 
 import com.jordantymburski.driftoff.data.PreferenceStorage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
+import com.jordantymburski.driftoff.service.AlarmScheduler;
 
 /**
  * Use case to set and update the persisted alarm information
  */
 public class SetInfo {
+    /**
+     * Alarm scheduling port
+     */
+    private final AlarmScheduler mAlarmScheduler;
+
     /**
      * Get alarm info use case to fetch existing cached value
      */
@@ -30,6 +36,7 @@ public class SetInfo {
      * @param context android application context
      */
     private SetInfo(Context context) {
+        mAlarmScheduler = AlarmScheduler.getInstance(context);
         mGetInfo = GetInfo.getInstance(context);
         mStorage = PreferenceStorage.getInstance(context);
     }
@@ -55,6 +62,7 @@ public class SetInfo {
      * internal async logic
      */
     private void resetAlarmAsync() {
+        mAlarmScheduler.cancel();
         update(new AlarmInfo(mGetInfo.current(), 0L));
     }
 
@@ -63,7 +71,11 @@ public class SetInfo {
      */
     private void setAlarmAsync() {
         final AlarmInfo currentInfo = mGetInfo.current();
-        update(new AlarmInfo(currentInfo, currentInfo.getTimeInMillis()));
+
+        final long alarmTime = currentInfo.getTimeInMillis();
+        mAlarmScheduler.schedule(alarmTime);
+
+        update(new AlarmInfo(currentInfo, alarmTime));
     }
 
     /**
