@@ -76,7 +76,7 @@ public class AlarmInfo {
      * ---------------------------------------------- */
 
     /**
-     * Caluclates the milliseconds till the alarm trigger
+     * Calculates the milliseconds till the alarm trigger
      * @return in milliseconds
      */
     private long getMillisTillAlarm() {
