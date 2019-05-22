@@ -55,9 +55,6 @@ public class HomeActivity extends FragmentActivity
         @Override
         public void run() {
             updateState();
-            if (mModelInfo.isActive()) {
-                mHandler.postDelayed(mUpdateRunnable, UPDATE_TIME_MS);
-            }
         }
     };
 
@@ -112,7 +109,7 @@ public class HomeActivity extends FragmentActivity
         }
 
         // Otherwise, proceed to update the UI
-        onChanged(mModelInfo);
+        updateView();
     }
 
     /* ----------------------------------------------
@@ -122,13 +119,8 @@ public class HomeActivity extends FragmentActivity
     @Override
     public void onChanged(@Nullable AlarmInfo info) {
         if (info != null && !info.equals(mModelInfo)) {
-            final boolean firstTime = (mModelInfo == null);
             mModelInfo = info;
-
-            if (firstTime) {
-                updateTime();
-            }
-            mHandler.post(mUpdateRunnable);
+            updateView();
         }
     }
 
@@ -161,7 +153,6 @@ public class HomeActivity extends FragmentActivity
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         mModel.setTime(hourOfDay, minute);
-        updateTime();
     }
 
     /* ----------------------------------------------
@@ -209,16 +200,22 @@ public class HomeActivity extends FragmentActivity
      * Updates the active state
      */
     private void updateState() {
-        if (mModelInfo.isActive()) {
-            mButtonRun.setImageResource(R.drawable.ic_stop);
-            mTextTime.setTextColor(mColorTextActive);
-            mTextPeriod.setTextColor(mColorTextActive);
-            mTextRemaining.setText(getTimeTextRemaining());
-        } else {
-            mButtonRun.setImageResource(R.drawable.ic_play);
-            mTextTime.setTextColor(mColorTextEdit);
-            mTextPeriod.setTextColor(mColorTextEdit);
-            mTextRemaining.setText(null);
+        mHandler.removeCallbacks(mUpdateRunnable);
+
+        if (mModelInfo != null) {
+            if (mModelInfo.isActive()) {
+                mButtonRun.setImageResource(R.drawable.ic_stop);
+                mTextTime.setTextColor(mColorTextActive);
+                mTextPeriod.setTextColor(mColorTextActive);
+                mTextRemaining.setText(getTimeTextRemaining());
+
+                mHandler.postDelayed(mUpdateRunnable, UPDATE_TIME_MS);
+            } else {
+                mButtonRun.setImageResource(R.drawable.ic_play);
+                mTextTime.setTextColor(mColorTextEdit);
+                mTextPeriod.setTextColor(mColorTextEdit);
+                mTextRemaining.setText(null);
+            }
         }
     }
 
@@ -226,15 +223,25 @@ public class HomeActivity extends FragmentActivity
      * Updates the time setting displayed in the UI
      */
     private void updateTime() {
-        Calendar alarmTime = mModelInfo.getTime();
-        if(DateFormat.is24HourFormat(getApplicationContext())) {
-            mTextTime.setText(
-                    DateFormat.getTimeFormat(getApplicationContext()).format(alarmTime.getTime()));
-            mTextPeriod.setText(null);
-        } else {
-            mTextTime.setText(DateFormat.format("h:mm", alarmTime));
-            mTextPeriod.setText(DateFormat.format("a", alarmTime).toString()
-                    .replace(".", ""));
+        if (mModelInfo != null) {
+            Calendar alarmTime = mModelInfo.getTime();
+            if (DateFormat.is24HourFormat(getApplicationContext())) {
+                mTextTime.setText(DateFormat.getTimeFormat(getApplicationContext())
+                        .format(alarmTime.getTime()));
+                mTextPeriod.setText(null);
+            } else {
+                mTextTime.setText(DateFormat.format("h:mm", alarmTime));
+                mTextPeriod.setText(DateFormat.format("a", alarmTime).toString()
+                        .replace(".", ""));
+            }
         }
+    }
+
+    /**
+     * Updates all views
+     */
+    private void updateView() {
+        updateState();
+        updateTime();
     }
 }
