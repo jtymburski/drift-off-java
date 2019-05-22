@@ -37,28 +37,28 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     /* ----------------------------------------------
-     * PUBLIC FUNCTIONS
+     * PACKAGE FUNCTIONS
      * ---------------------------------------------- */
 
     /**
      * Fetches the set info observable for usage by the holding activity
      * @return life-cycle aware observable
      */
-    public LiveData<AlarmInfo> getInfoObservable() {
+    LiveData<AlarmInfo> getInfoObservable() {
         return mInfoObservable;
     }
 
     /**
      * Reset the alarm (unset). Called when the alarm either goes off or is cancelled
      */
-    public void resetAlarm() {
+    void resetAlarm() {
         mUseSetInfo.resetAlarm();
     }
 
     /**
      * Set the alarm
      */
-    public void setAlarm() {
+    void setAlarm() {
         mUseSetInfo.setAlarm();
     }
 
@@ -67,7 +67,7 @@ public class HomeViewModel extends AndroidViewModel {
      * @param hour 0-23 hour setpoint
      * @param minute minute setpoint
      */
-    public void setTime(int hour, int minute) {
+    void setTime(int hour, int minute) {
         mUseSetInfo.setTime(hour, minute);
     }
 
@@ -75,7 +75,7 @@ public class HomeViewModel extends AndroidViewModel {
      * STATIC CREATE
      * ---------------------------------------------- */
 
-    public static HomeViewModel getInstance(ViewModelStoreOwner owner, Application app) {
+    static HomeViewModel getInstance(ViewModelStoreOwner owner, Application app) {
         return new ViewModelProvider(owner,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(app))
                 .get(HomeViewModel.class);
