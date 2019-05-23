@@ -55,25 +55,25 @@ public class GetInfo {
     /**
      * Create the observable object, if it has not been created already. If its newly created, it
      * will initiate a fetch immediately to fill it with a legitimate value
-     * @param fetchInThread TRUE to execute the fetch in a new thread. FALSE on the same thread
+     * @return TRUE if a new observable was created. FALSE if it already exists
      */
-    private void createObservable(boolean fetchInThread) {
+    private boolean createObservable() {
         if (mInfoObservable == null) {
             mInfoObservable = new MutableLiveData<>();
-            if (fetchInThread) {
-                fetchThread();
-            } else {
-                fetch();
-            }
+            return true;
         }
+        return false;
     }
 
     /**
      * Fetches the persisted information from the storage, on the current thread. It will
      * post the updates
+     * @return the fetched alarm information object
      */
-    private void fetch() {
-        post(mStorage.load());
+    private AlarmInfo fetch() {
+        final AlarmInfo info = mStorage.load();
+        post(info);
+        return info;
     }
 
     /**
@@ -98,8 +98,11 @@ public class GetInfo {
      * @return info object
      */
     AlarmInfo current() {
-        createObservable(false);
-        return mInfoObservable.getValue();
+        if (createObservable()) {
+            return fetch();
+        } else {
+            return mInfoObservable.getValue();
+        }
     }
 
     /**
@@ -122,7 +125,9 @@ public class GetInfo {
      * @return life-cycle aware observable
      */
     public LiveData<AlarmInfo> observable() {
-        createObservable(true);
+        if (createObservable()) {
+            fetchThread();
+        }
         return mInfoObservable;
     }
 }

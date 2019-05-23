@@ -32,8 +32,7 @@ public class AlarmScheduler {
      * @param context android application context
      */
     private AlarmScheduler(Context context) {
-        mJobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, AlarmJob.class))
-                .setPersisted(true);
+        mJobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, AlarmJob.class));
 
         mJobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
     }
@@ -74,6 +73,6 @@ public class AlarmScheduler {
         mJobScheduler.schedule(
                 mJobInfo.setMinimumLatency(triggerTime)
                         .setOverrideDeadline(triggerTime)
-                .build());
+                        .build());
     }
 }
