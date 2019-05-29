@@ -5,14 +5,12 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import com.jordantymburski.driftoff.domain.adapter.AlarmScheduler;
 
 /**
  * Manage alarm job scheduling
  */
-@Singleton
-public class AlarmScheduler {
+public class AlarmJobScheduler implements AlarmScheduler {
     private static final int JOB_ID = 866825119;
 
     /**
@@ -30,19 +28,19 @@ public class AlarmScheduler {
      * @param context android application context
      * @param jobScheduler system job scheduler service interface
      */
-    @Inject
-    public AlarmScheduler(Context context, JobScheduler jobScheduler) {
+    public AlarmJobScheduler(Context context, JobScheduler jobScheduler) {
         mJobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, AlarmJob.class));
         mJobScheduler = jobScheduler;
     }
 
     /* ----------------------------------------------
-     * PUBLIC FUNCTIONS
+     * AlarmScheduler OVERRIDES
      * ---------------------------------------------- */
 
     /**
      * Cancel any active alarm job
      */
+    @Override
     public void cancel() {
         mJobScheduler.cancel(JOB_ID);
     }
@@ -51,6 +49,7 @@ public class AlarmScheduler {
      * Schedule a job at the given time
      * @param time epoch unix time
      */
+    @Override
     public void schedule(long time) {
         long triggerTime = time - System.currentTimeMillis();
         if (triggerTime < 0) {

@@ -1,7 +1,7 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
+import com.jordantymburski.driftoff.domain.adapter.AlarmScheduler;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
-import com.jordantymburski.driftoff.service.AlarmScheduler;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
