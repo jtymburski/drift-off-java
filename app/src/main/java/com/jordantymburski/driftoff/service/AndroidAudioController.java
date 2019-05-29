@@ -6,14 +6,12 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import com.jordantymburski.driftoff.domain.adapter.AudioController;
 
 /**
  * Custom audio control and management functionality
  */
-@Singleton
-public class AudioController {
+public class AndroidAudioController implements AudioController {
     /**
      * Audio manager system service
      */
@@ -23,8 +21,7 @@ public class AudioController {
      * Main constructor
      * @param audioManager system audio manager service interface
      */
-    @Inject
-    public AudioController(AudioManager audioManager) {
+    public AndroidAudioController(AudioManager audioManager) {
         mAudioManager = audioManager;
     }
 
@@ -60,12 +57,13 @@ public class AudioController {
     }
 
     /* ----------------------------------------------
-     * PUBLIC FUNCTIONS
+     * AudioController OVERRIDES
      * ---------------------------------------------- */
 
     /**
      * Request focus on the audio layer. All listeners will stop playing
      */
+    @Override
     public void requestFocus() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             requestFocusNew();

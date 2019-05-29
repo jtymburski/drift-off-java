@@ -1,6 +1,6 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import com.jordantymburski.driftoff.service.AudioController;
+import com.jordantymburski.driftoff.domain.adapter.AudioController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
