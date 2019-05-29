@@ -117,6 +117,7 @@ public class AlarmInfo {
         c.set(Calendar.HOUR_OF_DAY, timeHour);
         c.set(Calendar.MINUTE, timeMinute);
         c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
         if (c.getTimeInMillis() <= System.currentTimeMillis()) {
             c.add(Calendar.DAY_OF_MONTH, 1);
         }
