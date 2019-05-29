@@ -29,7 +29,7 @@ public class PreferenceStorage {
     private final SharedPreferences mDatabase;
 
     /**
-     * Internal private constructor
+     * Main constructor
      * @param context android application context
      */
     @Inject

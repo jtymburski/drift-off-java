@@ -1,6 +1,8 @@
 package com.jordantymburski.driftoff.di;
 
+import android.app.job.JobScheduler;
 import android.content.Context;
+import android.media.AudioManager;
 
 import com.jordantymburski.driftoff.App;
 
@@ -21,5 +23,17 @@ public class AppModule {
     @Singleton
     Context provideApplicationContext() {
         return application;
+    }
+
+    @Provides
+    @Singleton
+    AudioManager provideAudioManager() {
+        return (AudioManager) application.getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    @Provides
+    @Singleton
+    JobScheduler provideJobScheduler() {
+        return (JobScheduler) application.getSystemService(Context.JOB_SCHEDULER_SERVICE);
     }
 }

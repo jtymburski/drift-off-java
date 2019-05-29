@@ -1,7 +1,6 @@
 package com.jordantymburski.driftoff.service;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
@@ -22,11 +21,11 @@ public class AudioController {
 
     /**
      * Main constructor
-     * @param context android application context
+     * @param audioManager system audio manager service interface
      */
     @Inject
-    public AudioController(Context context) {
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    public AudioController(AudioManager audioManager) {
+        mAudioManager = audioManager;
     }
 
     /* ----------------------------------------------

@@ -28,12 +28,12 @@ public class AlarmScheduler {
     /**
      * Main constructor
      * @param context android application context
+     * @param jobScheduler system job scheduler service interface
      */
     @Inject
-    public AlarmScheduler(Context context) {
+    public AlarmScheduler(Context context, JobScheduler jobScheduler) {
         mJobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, AlarmJob.class));
-
-        mJobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        mJobScheduler = jobScheduler;
     }
 
     /* ----------------------------------------------
