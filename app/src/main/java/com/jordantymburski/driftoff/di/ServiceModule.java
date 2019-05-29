@@ -17,6 +17,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.android.ContributesAndroidInjector;
 
+@SuppressWarnings("unused")
 @Module
 abstract class ServiceModule {
     @ContributesAndroidInjector

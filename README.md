@@ -2,7 +2,7 @@
 
 An Android app that will stop all playing media on the phone at a set time
 
-This project was inspired by wanting to play music playlists as you relax late at night and have it turn off automatically after falling asleep. Unfortunately, the native Android alarm apps have no capability to do this.
+This project was inspired by wanting to play music as you relax late at night and have it turn off automatically after falling asleep. Unfortunately, the native Android alarm apps have no capability to do this.
 
 Supports Android Marshmallow (6.0)+
 

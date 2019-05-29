@@ -16,8 +16,9 @@ public class AlarmJob extends JobService {
     /**
      * Stop audio domain use case
      */
+    @SuppressWarnings("WeakerAccess")
     @Inject
-    public StopAudio mUseStopAudio;
+    StopAudio mUseStopAudio;
 
     @Override
     public void onCreate() {

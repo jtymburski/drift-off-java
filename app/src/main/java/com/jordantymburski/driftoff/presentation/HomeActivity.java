@@ -45,6 +45,7 @@ public class HomeActivity extends FragmentActivity
     private AlarmInfo mModelInfo;
 
     // Model Factory
+    @SuppressWarnings("WeakerAccess")
     @Inject
     HomeViewModelFactory mModelFactory;
 

@@ -12,7 +12,7 @@ import com.jordantymburski.driftoff.domain.usecase.SetInfo;
 /**
  * View model manager of the home activity
  */
-public class HomeViewModel extends ViewModel {
+class HomeViewModel extends ViewModel {
     /**
      * Observable wrapper that the connected activity can monitor for changes
      */
@@ -28,7 +28,7 @@ public class HomeViewModel extends ViewModel {
      * @param getInfo use case to get the current alarm information
      * @param setInfo use case to set and update the persisted alarm information
      */
-    public HomeViewModel(GetInfo getInfo, SetInfo setInfo) {
+    HomeViewModel(GetInfo getInfo, SetInfo setInfo) {
         mInfoObservable = getInfo.observable();
         mUseSetInfo = setInfo;
     }

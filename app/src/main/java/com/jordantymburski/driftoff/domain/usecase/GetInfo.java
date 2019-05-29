@@ -28,8 +28,9 @@ public class GetInfo {
      * Main constructor
      * @param storage persisted storage implementation
      */
+    @SuppressWarnings("unused")
     @Inject
-    public GetInfo(Storage storage) {
+    GetInfo(Storage storage) {
         mStorage = storage;
     }
 

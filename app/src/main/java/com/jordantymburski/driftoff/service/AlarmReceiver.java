@@ -14,8 +14,9 @@ public class AlarmReceiver extends BroadcastReceiver {
     /**
      * Reschedule alarm domain use case
      */
+    @SuppressWarnings("WeakerAccess")
     @Inject
-    public RescheduleAlarm mUseRescheduleAlarm;
+    RescheduleAlarm mUseRescheduleAlarm;
 
     @Override
     public void onReceive(Context context, Intent intent) {

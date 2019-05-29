@@ -25,8 +25,9 @@ public class StopAudio {
      * @param audioController the audio controller
      * @param setInfo the set info use case
      */
+    @SuppressWarnings("unused")
     @Inject
-    public StopAudio(AudioController audioController, SetInfo setInfo) {
+    StopAudio(AudioController audioController, SetInfo setInfo) {
         mAudioController = audioController;
         mSetInfo = setInfo;
     }

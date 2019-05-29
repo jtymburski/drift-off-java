@@ -26,8 +26,9 @@ public class RescheduleAlarm {
      * @param alarmScheduler manages alarm job scheduling
      * @param getInfo use case to get the current alarm information
      */
+    @SuppressWarnings("unused")
     @Inject
-    public RescheduleAlarm(AlarmScheduler alarmScheduler, GetInfo getInfo) {
+    RescheduleAlarm(AlarmScheduler alarmScheduler, GetInfo getInfo) {
         mAlarmScheduler = alarmScheduler;
         mGetInfo = getInfo;
     }

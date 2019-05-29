@@ -33,8 +33,9 @@ public class SetInfo {
      * @param getInfo use case to get the current alarm information
      * @param storage persisted storage implementation
      */
+    @SuppressWarnings("unused")
     @Inject
-    public SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, Storage storage) {
+    SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, Storage storage) {
         mAlarmScheduler = alarmScheduler;
         mGetInfo = getInfo;
         mStorage = storage;

@@ -9,12 +9,12 @@ import com.jordantymburski.driftoff.domain.usecase.SetInfo;
 
 import javax.inject.Inject;
 
-public class HomeViewModelFactory implements ViewModelProvider.Factory {
+class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final GetInfo mUseGetInfo;
     private final SetInfo mUseSetInfo;
 
     @Inject
-    public HomeViewModelFactory(GetInfo getInfo, SetInfo setInfo) {
+    HomeViewModelFactory(GetInfo getInfo, SetInfo setInfo) {
         mUseGetInfo = getInfo;
         mUseSetInfo = setInfo;
     }

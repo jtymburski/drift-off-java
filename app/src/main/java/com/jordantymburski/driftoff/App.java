@@ -15,6 +15,7 @@ import dagger.android.HasActivityInjector;
 import dagger.android.HasBroadcastReceiverInjector;
 import dagger.android.HasServiceInjector;
 
+@SuppressWarnings("WeakerAccess")
 public class App extends Application
         implements HasActivityInjector,
                    HasBroadcastReceiverInjector,
