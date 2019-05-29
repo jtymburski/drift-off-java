@@ -19,6 +19,7 @@ android {
 }
 
 project.ext {
+    dagger = "2.22.1"
     lifecycle = "2.0.0"
 }
 
@@ -27,6 +28,12 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.0.0'
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle"
+
+    implementation "com.google.dagger:dagger:$dagger"
+    implementation "com.google.dagger:dagger-android:$dagger"
+    implementation "com.google.dagger:dagger-android-support:$dagger"
+    annotationProcessor "com.google.dagger:dagger-android-processor:$dagger"
+    annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
 
     testImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'

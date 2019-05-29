@@ -5,9 +5,13 @@ import android.content.SharedPreferences;
 
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Implementation of storage using the SharedPreferences android interface
  */
+@Singleton
 public class PreferenceStorage {
     private static final long DEFAULT_ALARM = 0L;
     private static final int DEFAULT_TIME_HOUR = 21;
@@ -25,29 +29,12 @@ public class PreferenceStorage {
     private final SharedPreferences mDatabase;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
-     */
-    private static PreferenceStorage sInstance;
-
-    /**
      * Internal private constructor
      * @param context android application context
      */
-    private PreferenceStorage(Context context) {
+    @Inject
+    public PreferenceStorage(Context context) {
         mDatabase = context.getSharedPreferences(STORE_NAME, Context.MODE_PRIVATE);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return preference storage instance
-     */
-    public static PreferenceStorage getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new PreferenceStorage(context);
-        }
-        return sInstance;
     }
 
     /* ----------------------------------------------

@@ -1,16 +1,18 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.jordantymburski.driftoff.data.PreferenceStorage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Use case to get the current alarm information and observe for changes
  */
+@Singleton
 public class GetInfo {
     /**
      * Observable wrapper that interfaces can monitor for changes
@@ -23,29 +25,12 @@ public class GetInfo {
     private final PreferenceStorage mStorage;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
+     * Main constructor
+     * @param storage persisted storage implementation
      */
-    private static GetInfo sInstance;
-
-    /**
-     * Internal private constructor
-     * @param context android application context
-     */
-    private GetInfo(Context context) {
-        mStorage = PreferenceStorage.getInstance(context);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return valid instance
-     */
-    public static GetInfo getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new GetInfo(context);
-        }
-        return sInstance;
+    @Inject
+    public GetInfo(PreferenceStorage storage) {
+        mStorage = storage;
     }
 
     /* ----------------------------------------------

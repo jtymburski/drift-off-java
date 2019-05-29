@@ -1,13 +1,15 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import android.content.Context;
-
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 import com.jordantymburski.driftoff.service.AlarmScheduler;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Use case to reschedule an existing alarm
  */
+@Singleton
 public class RescheduleAlarm {
     /**
      * Alarm scheduling port
@@ -20,30 +22,14 @@ public class RescheduleAlarm {
     private final GetInfo mGetInfo;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
+     * Main constructor
+     * @param alarmScheduler manages alarm job scheduling
+     * @param getInfo use case to get the current alarm information
      */
-    private static RescheduleAlarm sInstance;
-
-    /**
-     * Internal private constructor
-     * @param context android application context
-     */
-    private RescheduleAlarm(Context context) {
-        mAlarmScheduler = AlarmScheduler.getInstance(context);
-        mGetInfo = GetInfo.getInstance(context);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return valid instance
-     */
-    public static RescheduleAlarm getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new RescheduleAlarm(context);
-        }
-        return sInstance;
+    @Inject
+    public RescheduleAlarm(AlarmScheduler alarmScheduler, GetInfo getInfo) {
+        mAlarmScheduler = alarmScheduler;
+        mGetInfo = getInfo;
     }
 
     /* ----------------------------------------------

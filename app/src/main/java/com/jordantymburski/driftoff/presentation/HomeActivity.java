@@ -20,6 +20,10 @@ import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -39,6 +43,10 @@ public class HomeActivity extends FragmentActivity
     // Model
     private HomeViewModel mModel;
     private AlarmInfo mModelInfo;
+
+    // Model Factory
+    @Inject
+    HomeViewModelFactory mModelFactory;
 
     // UI
     private ImageButton mButtonRun;
@@ -60,6 +68,8 @@ public class HomeActivity extends FragmentActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         mTheme = getThemeResource();
@@ -83,7 +93,7 @@ public class HomeActivity extends FragmentActivity
         mTextTime.setOnClickListener(this);
 
         // Initialize the view model and set up the observable
-        mModel = HomeViewModel.getInstance(this, getApplication());
+        mModel = HomeViewModel.getInstance(this, mModelFactory);
         mModel.getInfoObservable().observe(this, this);
     }
 

@@ -1,14 +1,16 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import android.content.Context;
-
 import com.jordantymburski.driftoff.data.PreferenceStorage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 import com.jordantymburski.driftoff.service.AlarmScheduler;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Use case to set and update the persisted alarm information
  */
+@Singleton
 public class SetInfo {
     /**
      * Alarm scheduling port
@@ -26,31 +28,16 @@ public class SetInfo {
     private final PreferenceStorage mStorage;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
+     * Main constructor
+     * @param alarmScheduler manages alarm job scheduling
+     * @param getInfo use case to get the current alarm information
+     * @param storage persisted storage implementation
      */
-    private static SetInfo sInstance;
-
-    /**
-     * Internal private constructor
-     * @param context android application context
-     */
-    private SetInfo(Context context) {
-        mAlarmScheduler = AlarmScheduler.getInstance(context);
-        mGetInfo = GetInfo.getInstance(context);
-        mStorage = PreferenceStorage.getInstance(context);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return valid instance
-     */
-    public static SetInfo getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new SetInfo(context);
-        }
-        return sInstance;
+    @Inject
+    public SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, PreferenceStorage storage) {
+        mAlarmScheduler = alarmScheduler;
+        mGetInfo = getInfo;
+        mStorage = storage;
     }
 
     /* ----------------------------------------------

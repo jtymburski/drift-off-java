@@ -5,6 +5,10 @@ import android.app.job.JobService;
 
 import com.jordantymburski.driftoff.domain.usecase.StopAudio;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
 /**
  * Alarm job that the app will execute at the set time
  */
@@ -12,11 +16,13 @@ public class AlarmJob extends JobService {
     /**
      * Stop audio domain use case
      */
-    private StopAudio mUseStopAudio;
+    @Inject
+    public StopAudio mUseStopAudio;
 
     @Override
     public void onCreate() {
-        mUseStopAudio = StopAudio.getInstance(this);
+        AndroidInjection.inject(this);
+        super.onCreate();
     }
 
     @Override

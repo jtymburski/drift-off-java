@@ -1,9 +1,7 @@
 package com.jordantymburski.driftoff.presentation;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
@@ -14,7 +12,7 @@ import com.jordantymburski.driftoff.domain.usecase.SetInfo;
 /**
  * View model manager of the home activity
  */
-public class HomeViewModel extends AndroidViewModel {
+public class HomeViewModel extends ViewModel {
     /**
      * Observable wrapper that the connected activity can monitor for changes
      */
@@ -27,13 +25,12 @@ public class HomeViewModel extends AndroidViewModel {
 
     /**
      * Initializing constructor
-     * @param app application reference
+     * @param getInfo use case to get the current alarm information
+     * @param setInfo use case to set and update the persisted alarm information
      */
-    public HomeViewModel(Application app) {
-        super(app);
-
-        mInfoObservable = GetInfo.getInstance(app).observable();
-        mUseSetInfo = SetInfo.getInstance(app);
+    public HomeViewModel(GetInfo getInfo, SetInfo setInfo) {
+        mInfoObservable = getInfo.observable();
+        mUseSetInfo = setInfo;
     }
 
     /* ----------------------------------------------
@@ -75,9 +72,8 @@ public class HomeViewModel extends AndroidViewModel {
      * STATIC CREATE
      * ---------------------------------------------- */
 
-    static HomeViewModel getInstance(ViewModelStoreOwner owner, Application app) {
-        return new ViewModelProvider(owner,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(app))
+    static HomeViewModel getInstance(ViewModelStoreOwner owner, ViewModelProvider.Factory factory) {
+        return new ViewModelProvider(owner, factory)
                 .get(HomeViewModel.class);
     }
 }

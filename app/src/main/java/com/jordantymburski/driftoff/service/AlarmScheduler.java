@@ -5,9 +5,13 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manage alarm job scheduling
  */
+@Singleton
 public class AlarmScheduler {
     private static final int JOB_ID = 866825119;
 
@@ -22,31 +26,14 @@ public class AlarmScheduler {
     private final JobScheduler mJobScheduler;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
-     */
-    private static AlarmScheduler sInstance;
-
-    /**
-     * Internal private constructor
+     * Main constructor
      * @param context android application context
      */
-    private AlarmScheduler(Context context) {
+    @Inject
+    public AlarmScheduler(Context context) {
         mJobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, AlarmJob.class));
 
         mJobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return valid instance
-     */
-    public static AlarmScheduler getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new AlarmScheduler(context);
-        }
-        return sInstance;
     }
 
     /* ----------------------------------------------

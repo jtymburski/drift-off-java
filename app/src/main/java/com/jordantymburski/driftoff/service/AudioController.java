@@ -7,9 +7,13 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Custom audio control and management functionality
  */
+@Singleton
 public class AudioController {
     /**
      * Audio manager system service
@@ -17,29 +21,12 @@ public class AudioController {
     private final AudioManager mAudioManager;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
-     */
-    private static AudioController sInstance;
-
-    /**
-     * Internal private constructor
+     * Main constructor
      * @param context android application context
      */
-    private AudioController(Context context) {
+    @Inject
+    public AudioController(Context context) {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return valid instance
-     */
-    public static AudioController getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new AudioController(context);
-        }
-        return sInstance;
     }
 
     /* ----------------------------------------------

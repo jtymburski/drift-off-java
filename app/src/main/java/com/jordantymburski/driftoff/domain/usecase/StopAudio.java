@@ -1,12 +1,14 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import android.content.Context;
-
 import com.jordantymburski.driftoff.service.AudioController;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Use case to stop playing audio
  */
+@Singleton
 public class StopAudio {
     /**
      * Audio managing controller port
@@ -19,30 +21,14 @@ public class StopAudio {
     private final SetInfo mSetInfo;
 
     /**
-     * Instance of the class (singleton)
-     * TODO: Replace with DI
+     * Main constructor
+     * @param audioController the audio controller
+     * @param setInfo the set info use case
      */
-    private static StopAudio sInstance;
-
-    /**
-     * Internal private constructor
-     * @param context android application context
-     */
-    private StopAudio(Context context) {
-        mAudioController = AudioController.getInstance(context);
-        mSetInfo = SetInfo.getInstance(context);
-    }
-
-    /**
-     * Access the singleton instance
-     * @param context android application context
-     * @return valid instance
-     */
-    public static StopAudio getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new StopAudio(context);
-        }
-        return sInstance;
+    @Inject
+    public StopAudio(AudioController audioController, SetInfo setInfo) {
+        mAudioController = audioController;
+        mSetInfo = setInfo;
     }
 
     /* ----------------------------------------------
