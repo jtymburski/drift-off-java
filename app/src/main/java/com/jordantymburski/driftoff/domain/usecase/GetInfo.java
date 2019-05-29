@@ -3,7 +3,7 @@ package com.jordantymburski.driftoff.domain.usecase;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.jordantymburski.driftoff.data.PreferenceStorage;
+import com.jordantymburski.driftoff.domain.adapter.Storage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
 import javax.inject.Inject;
@@ -22,14 +22,14 @@ public class GetInfo {
     /**
      * Connection to the storage layer. Used to fetch current persisted state
      */
-    private final PreferenceStorage mStorage;
+    private final Storage mStorage;
 
     /**
      * Main constructor
      * @param storage persisted storage implementation
      */
     @Inject
-    public GetInfo(PreferenceStorage storage) {
+    public GetInfo(Storage storage) {
         mStorage = storage;
     }
 

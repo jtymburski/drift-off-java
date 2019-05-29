@@ -1,6 +1,6 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import com.jordantymburski.driftoff.data.PreferenceStorage;
+import com.jordantymburski.driftoff.domain.adapter.Storage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 import com.jordantymburski.driftoff.service.AlarmScheduler;
 
@@ -25,7 +25,7 @@ public class SetInfo {
     /**
      * Connection to the storage layer. Used to fetch current persisted state
      */
-    private final PreferenceStorage mStorage;
+    private final Storage mStorage;
 
     /**
      * Main constructor
@@ -34,7 +34,7 @@ public class SetInfo {
      * @param storage persisted storage implementation
      */
     @Inject
-    public SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, PreferenceStorage storage) {
+    public SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, Storage storage) {
         mAlarmScheduler = alarmScheduler;
         mGetInfo = getInfo;
         mStorage = storage;
