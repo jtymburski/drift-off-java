@@ -3,6 +3,8 @@ package com.jordantymburski.driftoff.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.jordantymburski.driftoff.domain.adapter.Storage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
@@ -36,6 +38,15 @@ public class PreferenceStorage implements Storage {
     /* ----------------------------------------------
      * Storage OVERRIDES
      * ---------------------------------------------- */
+
+    /**
+     * Delete all keys in the preference database
+     */
+    @SuppressWarnings("ApplySharedPref")
+    @VisibleForTesting
+    public void deleteAll() {
+        mDatabase.edit().clear().commit();
+    }
 
     /**
      * Load all data from the shared preference storage
