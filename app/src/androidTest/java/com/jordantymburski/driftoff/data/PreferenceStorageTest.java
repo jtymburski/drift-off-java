@@ -1,8 +1,6 @@
 package com.jordantymburski.driftoff.data;
 
-import androidx.test.platform.app.InstrumentationRegistry;
-
-import com.jordantymburski.driftoff.data.PreferenceStorage;
+import com.jordantymburski.driftoff.common.ContextProvider;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
 import org.junit.Test;
@@ -19,8 +17,7 @@ public class PreferenceStorageTest {
      * @return the preference storage
      */
     private PreferenceStorage createStorage(boolean deleteAll) {
-        PreferenceStorage storage = new PreferenceStorage(
-                InstrumentationRegistry.getInstrumentation().getTargetContext());
+        PreferenceStorage storage = new PreferenceStorage(ContextProvider.get());
         if (deleteAll) {
             storage.deleteAll();
         }
