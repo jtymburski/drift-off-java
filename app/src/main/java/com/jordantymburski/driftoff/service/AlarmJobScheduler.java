@@ -5,13 +5,16 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.jordantymburski.driftoff.domain.adapter.AlarmScheduler;
 
 /**
  * Manage alarm job scheduling
  */
 public class AlarmJobScheduler implements AlarmScheduler {
-    private static final int JOB_ID = 866825119;
+    @VisibleForTesting
+    static final int JOB_ID = 866825119;
 
     /**
      * Job info partially built object with constant settings defined
