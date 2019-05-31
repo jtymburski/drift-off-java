@@ -106,5 +106,10 @@ public class AndroidAudioControllerTest
 
         // Check the focus change
         assertEquals(AudioManager.AUDIOFOCUS_LOSS, mLastFocusChange);
+
+        // Release any fake focus resources
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            abandonFocus(audioManager);
+        }
     }
 }
