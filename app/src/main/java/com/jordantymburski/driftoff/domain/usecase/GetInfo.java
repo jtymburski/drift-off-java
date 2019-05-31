@@ -1,5 +1,6 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -28,9 +29,9 @@ public class GetInfo {
      * Main constructor
      * @param storage persisted storage implementation
      */
-    @SuppressWarnings("unused")
+    @VisibleForTesting
     @Inject
-    GetInfo(Storage storage) {
+    public GetInfo(Storage storage) {
         mStorage = storage;
     }
 

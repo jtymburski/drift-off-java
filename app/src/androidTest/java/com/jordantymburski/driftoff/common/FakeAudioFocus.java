@@ -28,7 +28,7 @@ public class FakeAudioFocus implements AudioManager.OnAudioFocusChangeListener {
     /**
      * Lock for waiting for a response
      */
-    private CountDownLatch mLock = new CountDownLatch(1);
+    private final CountDownLatch mLock = new CountDownLatch(1);
 
     /* ----------------------------------------------
      * CONSTRUCTOR
