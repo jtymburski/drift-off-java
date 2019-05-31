@@ -1,7 +1,5 @@
 package com.jordantymburski.driftoff.domain.usecase;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.jordantymburski.driftoff.domain.adapter.AlarmScheduler;
 import com.jordantymburski.driftoff.domain.adapter.Storage;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
@@ -35,9 +33,9 @@ public class SetInfo {
      * @param getInfo use case to get the current alarm information
      * @param storage persisted storage implementation
      */
-    @VisibleForTesting
+    @SuppressWarnings("unused")
     @Inject
-    public SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, Storage storage) {
+    SetInfo(AlarmScheduler alarmScheduler, GetInfo getInfo, Storage storage) {
         mAlarmScheduler = alarmScheduler;
         mGetInfo = getInfo;
         mStorage = storage;

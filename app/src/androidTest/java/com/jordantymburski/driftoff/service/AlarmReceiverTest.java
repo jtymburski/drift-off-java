@@ -7,34 +7,41 @@ import android.content.IntentFilter;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.jordantymburski.driftoff.App;
 import com.jordantymburski.driftoff.common.ContextProvider;
 import com.jordantymburski.driftoff.common.ServiceProvider;
-import com.jordantymburski.driftoff.data.PreferenceStorage;
-import com.jordantymburski.driftoff.domain.usecase.GetInfo;
-import com.jordantymburski.driftoff.domain.usecase.SetInfo;
+import com.jordantymburski.driftoff.domain.DomainProvider;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class AlarmReceiverTest {
+    /**
+     * Domain direct access for injected use cases
+     */
+    private final DomainProvider mDomainProvider = new DomainProvider();
+
+    @Before
+    public void setup() {
+        ((App) ContextProvider.get().getApplicationContext()).component().inject(mDomainProvider);
+    }
+
     @Test
-    public void trigger() throws InterruptedException {
+    public void bootCompleted() throws InterruptedException {
+        // System service connections
+        final Context context = ContextProvider.get();
+        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
+
+        // Set a valid alarm
+        mDomainProvider.setInfo.setAlarm();
+
         // Register the receiver for local broadcasts
         final AlarmReceiver receiver = new AlarmReceiver();
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
-        final Context context = ContextProvider.get();
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
-
-        // Schedule a normal job alarm through the domain
-        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
-        final PreferenceStorage storage = new PreferenceStorage(context);
-        final GetInfo getInfo = new GetInfo(storage);
-        final SetInfo setInfo = new SetInfo(
-                new AlarmJobScheduler(context, jobScheduler), getInfo, storage);
-        setInfo.setAlarm();
 
         // Cancel all existing jobs and make sure the alarm job has been removed
         jobScheduler.cancelAll();
@@ -48,11 +55,31 @@ public class AlarmReceiverTest {
         // Check that the job was recreated
         assertNotNull(jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID));
 
-        // Cancel all again and make sure the alarm job has been removed
+        // Clean up
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver);
+        jobScheduler.cancelAll();
+    }
+
+    @Test
+    public void timeChanged() throws InterruptedException {
+        // System service connections
+        final Context context = ContextProvider.get();
+        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
+
+        // Set a valid alarm
+        mDomainProvider.setInfo.setAlarm();
+
+        // Register the receiver for local broadcasts
+        final AlarmReceiver receiver = new AlarmReceiver();
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
+        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
+
+        // Cancel all existing jobs and make sure the alarm job has been removed
         jobScheduler.cancelAll();
         assertNull(jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID));
 
-        // Broadcast to force a create with BOOT_COMPLETED
+        // Broadcast to force a create with TIME_CHANGED
         LocalBroadcastManager.getInstance(context)
                 .sendBroadcast(new Intent(Intent.ACTION_TIME_CHANGED));
         Thread.sleep(2500);

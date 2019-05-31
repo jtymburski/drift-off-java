@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 
+import com.jordantymburski.driftoff.di.AppComponent;
 import com.jordantymburski.driftoff.di.AppModule;
 import com.jordantymburski.driftoff.di.DaggerAppComponent;
 
@@ -29,14 +30,19 @@ public class App extends Application
     @Inject
     DispatchingAndroidInjector<Service> dispatchingServiceInjector;
 
+    /**
+     * Built DI app component
+     */
+    private AppComponent appComponent;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        DaggerAppComponent.builder()
+        appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
-                .build()
-                .inject(this);
+                .build();
+        appComponent.inject(this);
     }
 
     @Override
@@ -52,5 +58,13 @@ public class App extends Application
     @Override
     public DispatchingAndroidInjector<Service> serviceInjector() {
         return dispatchingServiceInjector;
+    }
+
+    /**
+     * Fetches the core DI component for the entire application
+     * @return built component
+     */
+    public AppComponent component() {
+        return appComponent;
     }
 }

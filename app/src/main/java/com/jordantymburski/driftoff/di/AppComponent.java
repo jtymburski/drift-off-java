@@ -1,6 +1,7 @@
 package com.jordantymburski.driftoff.di;
 
 import com.jordantymburski.driftoff.App;
+import com.jordantymburski.driftoff.domain.DomainProvider;
 
 import javax.inject.Singleton;
 
@@ -17,4 +18,5 @@ import dagger.android.AndroidInjector;
         HomeActivityModule.class
 })
 public interface AppComponent extends AndroidInjector<App> {
+    void inject(DomainProvider domainProvider);
 }
