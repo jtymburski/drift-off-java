@@ -1,4 +1,4 @@
-package com.jordantymburski.driftoff;
+package com.jordantymburski.driftoff.data;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-public class DataPreferenceStorageTest {
+public class PreferenceStorageTest {
     /**
      * Creates a storage instance
      * @param deleteAll TRUE to delete all existing data. FALSE to leave as is
