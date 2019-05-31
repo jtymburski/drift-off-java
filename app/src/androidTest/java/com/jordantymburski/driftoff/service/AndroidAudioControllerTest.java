@@ -5,6 +5,7 @@ import android.media.AudioManager;
 
 import com.jordantymburski.driftoff.common.ContextProvider;
 import com.jordantymburski.driftoff.common.FakeAudioFocus;
+import com.jordantymburski.driftoff.common.ServiceProvider;
 
 import org.junit.Test;
 
@@ -19,10 +20,6 @@ public class AndroidAudioControllerTest {
         return new AndroidAudioController(audioManager);
     }
 
-    private AudioManager getAudioManager() {
-        return (AudioManager) ContextProvider.get().getSystemService(Context.AUDIO_SERVICE);
-    }
-
     /* ----------------------------------------------
      * TEST CASES
      * ---------------------------------------------- */
@@ -30,7 +27,7 @@ public class AndroidAudioControllerTest {
     @Test
     public void getFocus() throws InterruptedException {
         // Create a fake focus request to stream music
-        final AudioManager audioManager = getAudioManager();
+        final AudioManager audioManager = ServiceProvider.audioManager(ContextProvider.get());
         final FakeAudioFocus fakeFocus = new FakeAudioFocus(audioManager);
         fakeFocus.request();
 

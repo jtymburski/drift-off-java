@@ -5,6 +5,7 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 
 import com.jordantymburski.driftoff.common.ContextProvider;
+import com.jordantymburski.driftoff.common.ServiceProvider;
 
 import org.junit.Test;
 
@@ -26,13 +27,6 @@ public class AlarmJobSchedulerTest {
         return new AlarmJobScheduler(context, jobScheduler);
     }
 
-    private JobScheduler getJobScheduler(Context context) {
-        final JobScheduler jobScheduler
-                = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        cleanUp(jobScheduler);
-        return jobScheduler;
-    }
-
     /* ----------------------------------------------
      * TEST CASES
      * ---------------------------------------------- */
@@ -40,7 +34,7 @@ public class AlarmJobSchedulerTest {
     @Test
     public void schedule() {
         final Context context = ContextProvider.get();
-        final JobScheduler jobScheduler = getJobScheduler(context);
+        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
         final AlarmJobScheduler alarmScheduler = getAlarmScheduler(context, jobScheduler);
 
         // Schedule an alarm job trigger
@@ -59,7 +53,7 @@ public class AlarmJobSchedulerTest {
     @Test
     public void cancel() {
         final Context context = ContextProvider.get();
-        final JobScheduler jobScheduler = getJobScheduler(context);
+        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
         final AlarmJobScheduler alarmScheduler = getAlarmScheduler(context, jobScheduler);
 
         // Schedule an alarm job trigger
@@ -83,7 +77,7 @@ public class AlarmJobSchedulerTest {
     @Test
     public void trigger() throws InterruptedException {
         final Context context = ContextProvider.get();
-        final JobScheduler jobScheduler = getJobScheduler(context);
+        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
         final AlarmJobScheduler alarmScheduler = getAlarmScheduler(context, jobScheduler);
 
         // Schedule an alarm job trigger now
