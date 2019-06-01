@@ -44,6 +44,7 @@ public class AlarmReceiverTest {
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
 
         // Cancel all existing jobs and make sure the alarm job has been removed
+        Thread.sleep(250);
         jobScheduler.cancelAll();
         assertNull(jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID));
 
@@ -76,6 +77,7 @@ public class AlarmReceiverTest {
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
 
         // Cancel all existing jobs and make sure the alarm job has been removed
+        Thread.sleep(250);
         jobScheduler.cancelAll();
         assertNull(jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID));
 
