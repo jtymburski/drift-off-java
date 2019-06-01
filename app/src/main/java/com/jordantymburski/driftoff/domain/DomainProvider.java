@@ -1,6 +1,7 @@
 package com.jordantymburski.driftoff.domain;
 
 import com.jordantymburski.driftoff.domain.usecase.SetInfo;
+import com.jordantymburski.driftoff.domain.usecase.StopAudio;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,9 @@ import javax.inject.Inject;
 public class DomainProvider {
     @Inject
     public SetInfo setInfo;
+
+    @Inject
+    public StopAudio stopAudio;
 
     public DomainProvider() {}
 }

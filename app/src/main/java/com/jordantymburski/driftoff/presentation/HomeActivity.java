@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 
@@ -57,6 +58,10 @@ public class HomeActivity extends FragmentActivity
 
     // UI theme
     private int mTheme;
+
+    // Last time picker dialog that was opened
+    @VisibleForTesting
+    TimePickerDialog mTimePicker;
 
     // Update runnable
     private final Handler mHandler = new Handler();
@@ -112,6 +117,9 @@ public class HomeActivity extends FragmentActivity
     @Override
     public void onResume() {
         super.onResume();
+
+        // Clean up any previously active dialog reference
+        mTimePicker = null;
 
         // Check that the theme is still correct
         if (mTheme != getThemeResource()) {
@@ -174,9 +182,10 @@ public class HomeActivity extends FragmentActivity
      * Edit the alarm time
      */
     private void editTime() {
-        new TimePickerDialog(this, this,
+        mTimePicker = new TimePickerDialog(this, this,
                 mModelInfo.timeHour, mModelInfo.timeMinute,
-                DateFormat.is24HourFormat(getApplicationContext())).show();
+                DateFormat.is24HourFormat(getApplicationContext()));
+        mTimePicker.show();
     }
 
     /**
