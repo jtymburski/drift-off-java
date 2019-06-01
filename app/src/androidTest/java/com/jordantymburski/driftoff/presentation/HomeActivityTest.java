@@ -50,7 +50,8 @@ public class HomeActivityTest {
     private final Random mRandom = new Random();
 
     @Rule
-    public ActivityTestRule<HomeActivity> activityRule = new ActivityTestRule<>(HomeActivity.class);
+    public final ActivityTestRule<HomeActivity> activityRule
+            = new ActivityTestRule<>(HomeActivity.class);
 
     @BeforeClass
     public static void preSetup() {
