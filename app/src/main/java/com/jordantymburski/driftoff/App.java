@@ -24,11 +24,6 @@ public class App extends Application
     @Inject
     DispatchingAndroidInjector<BroadcastReceiver> dispatchingReceiverInjector;
 
-    /**
-     * Built DI app component
-     */
-    private AndroidInjector<App> appComponent;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -49,19 +44,10 @@ public class App extends Application
     }
 
     /**
-     * Fetches the core DI component for the entire application
-     * @return built component
-     */
-    public AndroidInjector<App> component() {
-        return appComponent;
-    }
-
-    /**
      * Sets the main component to be used for all android entity injections
      * @param newComponent new android injection component
      */
     public void component(AndroidInjector<App> newComponent) {
-        this.appComponent = newComponent;
-        this.appComponent.inject(this);
+        newComponent.inject(this);
     }
 }

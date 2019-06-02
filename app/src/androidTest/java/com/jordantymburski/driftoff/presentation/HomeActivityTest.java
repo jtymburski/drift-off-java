@@ -11,26 +11,26 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.ImageButton;
 
+import androidx.lifecycle.MutableLiveData;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.matcher.BoundedMatcher;
 import androidx.test.rule.ActivityTestRule;
 
-import com.jordantymburski.driftoff.App;
 import com.jordantymburski.driftoff.R;
 import com.jordantymburski.driftoff.common.ContextProvider;
-import com.jordantymburski.driftoff.data.PreferenceStorage;
-import com.jordantymburski.driftoff.di.AppComponent;
-import com.jordantymburski.driftoff.domain.DomainProvider;
+import com.jordantymburski.driftoff.domain.MockDomain;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.mockito.Mockito;
 
 import java.util.Calendar;
 import java.util.Random;
@@ -46,9 +46,25 @@ import static org.junit.Assert.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class HomeActivityTest {
     /**
+     * The domain interception object
+     */
+    private static MockDomain mDomain;
+
+    /**
+     * Primary data observable
+     */
+    private static MutableLiveData<AlarmInfo> mObservable;
+
+    /**
      * Random number generator instance
      */
-    private final Random mRandom = new Random();
+    private static final Random mRandom = new Random();
+
+    /**
+     * Randomized starting alarm info
+     */
+    private static AlarmInfo mStartInfo = new AlarmInfo(
+            0L, mRandom.nextInt(24), mRandom.nextInt(60));
 
     @Rule
     public final ActivityTestRule<HomeActivity> activityRule
@@ -56,8 +72,17 @@ public class HomeActivityTest {
 
     @BeforeClass
     public static void preSetup() {
-        // Delete all existing storage to start fresh
-        new PreferenceStorage(ContextProvider.get()).deleteAll();
+        mDomain = new MockDomain();
+
+        // Observable
+        mObservable = new MutableLiveData<>();
+        mObservable.postValue(mStartInfo);
+        Mockito.when(mDomain.getInfo().observable()).thenReturn(mObservable);
+    }
+
+    @Before
+    public void setup() {
+        mDomain.clearInvocations();
     }
 
     /* ----------------------------------------------
@@ -68,12 +93,8 @@ public class HomeActivityTest {
     public void t01_initialLoad() throws InterruptedException {
         waitForUpdate();
 
-        // Fetch the starting data
-        final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
-
         // Check the time
-        checkTime(context, startInfo);
+        checkTime(ContextProvider.get(), mStartInfo);
 
         // Check the remaining status
         checkText(getViewTextRemaining(), null);
@@ -87,12 +108,8 @@ public class HomeActivityTest {
         waitForUpdate();
         final HomeActivity activity = activityRule.getActivity();
 
-        // Fetch the starting data
-        final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
-
         // Check the time
-        checkTime(context, startInfo);
+        checkTime(activity, mStartInfo);
 
         // Click on the time to open the calendar mod
         getViewTextTime().perform(click());
@@ -113,8 +130,8 @@ public class HomeActivityTest {
         waitForUpdate();
         assertFalse(timePicker.isShowing());
 
-        // Check the time that it still hasn't changed
-        checkTime(context, startInfo);
+        // Check the time that no request to change it has been made
+        mDomain.verifyZeroInteractions();
     }
 
     @Test
@@ -122,12 +139,8 @@ public class HomeActivityTest {
         waitForUpdate();
         final HomeActivity activity = activityRule.getActivity();
 
-        // Fetch the starting data
-        final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
-
         // Check the time
-        checkTime(context, startInfo);
+        checkTime(activity, mStartInfo);
 
         // Click on the time to open the calendar mod
         getViewTextTime().perform(click());
@@ -148,8 +161,9 @@ public class HomeActivityTest {
         waitForUpdate();
         assertFalse(timePicker.isShowing());
 
-        // Check the time that it still hasn't changed
-        checkTime(context, startInfo);
+        // Check the time that the requested set time matches the existing
+        Mockito.verify(mDomain.setInfo()).setTime(mStartInfo.timeHour, mStartInfo.timeMinute);
+        mDomain.verifyNoMoreInteractions();
     }
 
     @Test
@@ -157,12 +171,8 @@ public class HomeActivityTest {
         waitForUpdate();
         final HomeActivity activity = activityRule.getActivity();
 
-        // Fetch the starting data
-        final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
-
         // Check the time
-        checkTime(context, startInfo);
+        checkTime(activity, mStartInfo);
 
         // Click on the time to open the calendar mod
         getViewTextTime().perform(click());
@@ -174,7 +184,7 @@ public class HomeActivityTest {
         assertTrue(timePicker.isShowing());
 
         // Modify the time
-        final AlarmInfo newInfo = new AlarmInfo(startInfo,
+        final AlarmInfo newInfo = new AlarmInfo(mStartInfo,
                 mRandom.nextInt(24), mRandom.nextInt(60));
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -186,159 +196,151 @@ public class HomeActivityTest {
         waitForUpdate();
         assertFalse(timePicker.isShowing());
 
-        // Check the time was updated
-        checkTime(context, newInfo);
+        // Check the time set that was requested matches the new one randomly defined above
+        Mockito.verify(mDomain.setInfo()).setTime(newInfo.timeHour, newInfo.timeMinute);
+        mDomain.verifyNoMoreInteractions();
+
+        // Pass it through to the observer and witness the update
+        mStartInfo = newInfo;
+        mObservable.postValue(newInfo);
+        waitForUpdate();
+        checkTime(activity, newInfo);
     }
 
     @Test
     public void t05_startAndStopAlarm() throws InterruptedException {
         waitForUpdate();
-
-        // Fetch the starting data
         final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
 
         // Check that the alarm is not active and the starting parameters are still maintained
-        checkAlarmInactive(context, startInfo);
+        checkAlarmInactive(context, mStartInfo);
 
         // Start the alarm
         getViewBtnRun().perform(click());
         waitForUpdate();
 
-        // Check that the alarm is now active and displayed
-        checkAlarmActive(context, startInfo);
+        // Check that the alarm was attempted to be set on the domain
+        Mockito.verify(mDomain.setInfo()).setAlarm();
+        mDomain.verifyNoMoreInteractions();
+
+        // Set the alarm in the observer and witness the result
+        final AlarmInfo setInfo = new AlarmInfo(mStartInfo, mStartInfo.getTimeInMillis());
+        mObservable.postValue(setInfo);
+        waitForUpdate();
+        checkAlarmActive(context, setInfo);
 
         // Stop the alarm
         getViewBtnRun().perform(click());
         waitForUpdate();
 
+        // Check that the activity requested the alarm to be reset to the domain
+        Mockito.verify(mDomain.setInfo()).resetAlarm();
+        mDomain.verifyNoMoreInteractions();
+
         // Check that the alarm is no longer displayed and back to the start
-        checkAlarmInactive(context, startInfo);
+        mObservable.postValue(mStartInfo);
+        waitForUpdate();
+        checkAlarmInactive(context, mStartInfo);
     }
 
     @Test
     public void t06_alarmOverHour() throws InterruptedException {
-        waitForUpdate();
+        final HomeActivity activity = activityRule.getActivity();
 
-        // Set the time to over 1 hour from now
+        // Fetch the time for over 1 hour from now
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.HOUR_OF_DAY, 2);
         final AlarmInfo info = new AlarmInfo(
                 0L, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
-        // Set it in the activity and connected backend
-        final HomeActivity activity = activityRule.getActivity();
-        activity.onTimeSet(null, info.timeHour, info.timeMinute);
-        waitForUpdate();
-
         // Start the alarm
         final AlarmInfo infoActive = new AlarmInfo(info, info.getTimeInMillis());
-        getViewBtnRun().perform(click());
+        mObservable.postValue(infoActive);
         waitForUpdate();
 
         // Check the time string
-        checkAlarmActive(ContextProvider.get(), info);
+        checkAlarmActive(activity, infoActive);
         checkText(getViewTextRemaining(), activity.getResources().getQuantityString(
                 R.plurals.alarm_notice_hours, (int) infoActive.getHoursTillAlarm(),
                 infoActive.getHoursTillAlarm()));
 
-        // Stop the alarm
-        getViewBtnRun().perform(click());
+        // Reset the observable state
+        mObservable.postValue(mStartInfo);
     }
 
     @Test
     public void t07_alarmUnderHour() throws InterruptedException {
-        waitForUpdate();
+        final HomeActivity activity = activityRule.getActivity();
 
-        // Set the time to over 1 minute from now
+        // Fetch the time for over 1 minute from now
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 2);
         final AlarmInfo info = new AlarmInfo(
                 0L, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
-        // Set it in the activity and connected backend
-        final HomeActivity activity = activityRule.getActivity();
-        activity.onTimeSet(null, info.timeHour, info.timeMinute);
-        waitForUpdate();
-
         // Start the alarm
-        final AlarmInfo infoActive = new AlarmInfo(info, info.getTimeInMillis());
-        getViewBtnRun().perform(click());
+        mStartInfo = new AlarmInfo(info, info.getTimeInMillis());
+        mObservable.postValue(mStartInfo);
         waitForUpdate();
 
         // Check the time string
-        checkAlarmActive(ContextProvider.get(), info);
+        checkAlarmActive(activity, mStartInfo);
         checkText(getViewTextRemaining(), activity.getResources().getQuantityString(
-                R.plurals.alarm_notice_minutes, (int) infoActive.getMinutesTillAlarm(),
-                infoActive.getMinutesTillAlarm()));
-
-        // Stop the alarm
-        getViewBtnRun().perform(click());
+                R.plurals.alarm_notice_minutes, (int) mStartInfo.getMinutesTillAlarm(),
+                mStartInfo.getMinutesTillAlarm()));
     }
 
     @Test
     public void t08_noTimeDialogIfAlarm() throws InterruptedException {
         waitForUpdate();
+        final HomeActivity activity = activityRule.getActivity();
 
-        // Start the alarm
-        getViewBtnRun().check(matches(withImageDrawable(R.drawable.ic_play)));
-        getViewBtnRun().perform(click());
-        waitForUpdate();
+        // Check that an alarm is active
+        assertTrue(mStartInfo.isActive());
+        checkAlarmActive(activity, mStartInfo);
 
         // Try to open the dialog
         getViewTextTime().perform(click());
         waitForUpdate();
-
-        // Check that the dialog was not opened
-        getViewBtnRun().check(matches(withImageDrawable(R.drawable.ic_stop)));
-        assertNull(activityRule.getActivity().mTimePicker);
+        assertNull(activity.mTimePicker);
     }
 
     @Test
     public void t09_alarmFired() throws InterruptedException {
         waitForUpdate();
-
-        // Fetch the starting data
         final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
-        assertTrue(startInfo.isActive());
 
-        // Check that the alarm is still active from the previous test case
-        checkAlarmActive(context, startInfo);
+        // Check that an alarm is active
+        assertTrue(mStartInfo.isActive());
+        checkAlarmActive(context, mStartInfo);
 
-        // Force the fire from the back-end domain use case
-        final DomainProvider domainProvider = new DomainProvider();
-        ((AppComponent) ((App) ContextProvider.get().getApplicationContext()).component())
-                .inject(domainProvider);
-        domainProvider.stopAudio.execute();
+        // Change to a non-active alarm and update
+        mStartInfo = new AlarmInfo(mStartInfo, 0L);
+        assertFalse(mStartInfo.isActive());
+        mObservable.postValue(mStartInfo);
         waitForUpdate();
 
         // Check that the alarm is no longer active
-        checkAlarmInactive(context, startInfo);
+        checkAlarmInactive(context, mStartInfo);
     }
 
     @Test
     public void t10_setAlarmBackground() throws InterruptedException {
         waitForUpdate();
-
-        // Fetch the starting data
         final Context context = ContextProvider.get();
-        final AlarmInfo startInfo = new PreferenceStorage(context).load();
-        assertFalse(startInfo.isActive());
 
-        // Check that there is no active alarm
-        checkAlarmInactive(context, startInfo);
+        // Make sure the alarm is inactive
+        assertFalse(mStartInfo.isActive());
+        checkAlarmInactive(context, mStartInfo);
 
-        // Force the fire from the back-end domain use case
-        final DomainProvider domainProvider = new DomainProvider();
-        ((AppComponent) ((App) ContextProvider.get().getApplicationContext()).component())
-                .inject(domainProvider);
-        domainProvider.setInfo.setAlarm();
+        // Change to an active alarm
+        final AlarmInfo activeInfo = new AlarmInfo(mStartInfo, mStartInfo.getTimeInMillis());
+        assertTrue(activeInfo.isActive());
+        mObservable.postValue(activeInfo);
         waitForUpdate();
 
-        // Check that the alarm is now active
-        checkAlarmActive(context, startInfo);
-        getViewBtnRun().perform(click());
+        // Check for an active alarm
+        checkAlarmActive(context, activeInfo);
     }
 
     /* ----------------------------------------------

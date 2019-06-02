@@ -6,55 +6,22 @@ import android.content.IntentFilter;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.jordantymburski.driftoff.App;
 import com.jordantymburski.driftoff.common.ContextProvider;
-import com.jordantymburski.driftoff.di.testing.DaggerMockAppComponent;
-import com.jordantymburski.driftoff.di.testing.MockDomainModule;
-import com.jordantymburski.driftoff.domain.usecase.GetInfo;
-import com.jordantymburski.driftoff.domain.usecase.RescheduleAlarm;
-import com.jordantymburski.driftoff.domain.usecase.SetInfo;
-import com.jordantymburski.driftoff.domain.usecase.StopAudio;
+import com.jordantymburski.driftoff.domain.MockDomain;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 public class AlarmReceiverTest {
     /**
-     * Get info domain use case mock
+     * The domain interception object
      */
-    @Mock
-    private GetInfo mGetInfo;
-
-    /**
-     * Reschedule alarm domain use case mock
-     */
-    @Mock
-    private RescheduleAlarm mRescheduleAlarm;
-
-    /**
-     * Set info domain use case mock
-     */
-    @Mock
-    private SetInfo mSetInfo;
-
-    /**
-     * Stop audio domain use case mock
-     */
-    @Mock
-    private StopAudio mStopAudio;
+    private MockDomain mDomain;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-
-        final App application = (App) ContextProvider.get().getApplicationContext();
-        application.component(DaggerMockAppComponent.builder()
-                .mockDomainModule(new MockDomainModule(
-                        mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio))
-                .build());
+        mDomain = new MockDomain();
     }
 
     @Test
@@ -69,7 +36,7 @@ public class AlarmReceiverTest {
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
 
         // Make sure no calls have been made to the use cases
-        Mockito.verifyZeroInteractions(mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio);
+        mDomain.verifyZeroInteractions();
 
         // Broadcast to force a create with BOOT_COMPLETED
         LocalBroadcastManager.getInstance(context)
@@ -77,8 +44,8 @@ public class AlarmReceiverTest {
         Thread.sleep(250);
 
         // Check that just the reschedule was called
-        Mockito.verify(mRescheduleAlarm).execute();
-        Mockito.verifyNoMoreInteractions(mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio);
+        Mockito.verify(mDomain.rescheduleAlarm()).execute();
+        mDomain.verifyNoMoreInteractions();
 
         // Clean up
         LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver);
@@ -96,7 +63,7 @@ public class AlarmReceiverTest {
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
 
         // Make sure no calls have been made to the use cases
-        Mockito.verifyZeroInteractions(mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio);
+        mDomain.verifyZeroInteractions();
 
         // Broadcast to force a create with BOOT_COMPLETED
         LocalBroadcastManager.getInstance(context)
@@ -104,8 +71,8 @@ public class AlarmReceiverTest {
         Thread.sleep(250);
 
         // Check that just the reschedule was called
-        Mockito.verify(mStopAudio).execute();
-        Mockito.verifyNoMoreInteractions(mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio);
+        Mockito.verify(mDomain.stopAudio()).execute();
+        mDomain.verifyNoMoreInteractions();
 
         // Clean up
         LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver);
@@ -123,7 +90,7 @@ public class AlarmReceiverTest {
         LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
 
         // Make sure no calls have been made to the use cases
-        Mockito.verifyZeroInteractions(mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio);
+        mDomain.verifyZeroInteractions();
 
         // Broadcast to force a create with BOOT_COMPLETED
         LocalBroadcastManager.getInstance(context)
@@ -131,8 +98,8 @@ public class AlarmReceiverTest {
         Thread.sleep(250);
 
         // Check that just the reschedule was called
-        Mockito.verify(mRescheduleAlarm).execute();
-        Mockito.verifyNoMoreInteractions(mGetInfo, mRescheduleAlarm, mSetInfo, mStopAudio);
+        Mockito.verify(mDomain.rescheduleAlarm()).execute();
+        mDomain.verifyNoMoreInteractions();
 
         // Clean up
         LocalBroadcastManager.getInstance(context).unregisterReceiver(receiver);
