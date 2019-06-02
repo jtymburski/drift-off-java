@@ -1,6 +1,6 @@
-<p align=center>
+<div align=center>
 <img src="exports/driftoff.png" width="450px">
-</p>
+</div>
 
 
 
