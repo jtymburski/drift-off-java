@@ -2,47 +2,40 @@ package com.jordantymburski.driftoff;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 
-import com.jordantymburski.driftoff.di.AppComponent;
 import com.jordantymburski.driftoff.di.AppModule;
 import com.jordantymburski.driftoff.di.DaggerAppComponent;
 
 import javax.inject.Inject;
 
+import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 import dagger.android.HasBroadcastReceiverInjector;
-import dagger.android.HasServiceInjector;
 
 @SuppressWarnings("WeakerAccess")
 public class App extends Application
         implements HasActivityInjector,
-                   HasBroadcastReceiverInjector,
-                   HasServiceInjector {
+                   HasBroadcastReceiverInjector {
     @Inject
     DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
 
     @Inject
     DispatchingAndroidInjector<BroadcastReceiver> dispatchingReceiverInjector;
 
-    @Inject
-    DispatchingAndroidInjector<Service> dispatchingServiceInjector;
-
     /**
      * Built DI app component
      */
-    private AppComponent appComponent;
+    private AndroidInjector<App> appComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        appComponent = DaggerAppComponent.builder()
+        component(DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
-                .build();
-        appComponent.inject(this);
+                .build());
     }
 
     @Override
@@ -55,16 +48,20 @@ public class App extends Application
         return dispatchingReceiverInjector;
     }
 
-    @Override
-    public DispatchingAndroidInjector<Service> serviceInjector() {
-        return dispatchingServiceInjector;
-    }
-
     /**
      * Fetches the core DI component for the entire application
      * @return built component
      */
-    public AppComponent component() {
+    public AndroidInjector<App> component() {
         return appComponent;
+    }
+
+    /**
+     * Sets the main component to be used for all android entity injections
+     * @param newComponent new android injection component
+     */
+    public void component(AndroidInjector<App> newComponent) {
+        this.appComponent = newComponent;
+        this.appComponent.inject(this);
     }
 }

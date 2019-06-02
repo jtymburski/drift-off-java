@@ -1,11 +1,9 @@
 package com.jordantymburski.driftoff.service;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
-
-import androidx.annotation.VisibleForTesting;
+import android.content.Intent;
 
 import com.jordantymburski.driftoff.domain.adapter.AlarmScheduler;
 
@@ -13,27 +11,25 @@ import com.jordantymburski.driftoff.domain.adapter.AlarmScheduler;
  * Manage alarm job scheduling
  */
 public class AlarmJobScheduler implements AlarmScheduler {
-    @VisibleForTesting
-    static final int JOB_ID = 866825119;
+    /**
+     * The pending alarm intent when the alarm fires
+     */
+    private final PendingIntent mAlarmIntent;
 
     /**
-     * Job info partially built object with constant settings defined
+     * Alarm manager system service
      */
-    private final JobInfo.Builder mJobInfo;
-
-    /**
-     * Job scheduler system service
-     */
-    private final JobScheduler mJobScheduler;
+    private final AlarmManager mAlarmManager;
 
     /**
      * Main constructor
      * @param context android application context
-     * @param jobScheduler system job scheduler service interface
+     * @param alarmManager system alarm manager service interface
+     * @param broadcastIntent the intent to locally broadcast towards the AlarmReceiver
      */
-    public AlarmJobScheduler(Context context, JobScheduler jobScheduler) {
-        mJobInfo = new JobInfo.Builder(JOB_ID, new ComponentName(context, AlarmJob.class));
-        mJobScheduler = jobScheduler;
+    public AlarmJobScheduler(Context context, AlarmManager alarmManager, Intent broadcastIntent) {
+        mAlarmManager = alarmManager;
+        mAlarmIntent = PendingIntent.getBroadcast(context, 0, broadcastIntent, 0);
     }
 
     /* ----------------------------------------------
@@ -45,7 +41,7 @@ public class AlarmJobScheduler implements AlarmScheduler {
      */
     @Override
     public void cancel() {
-        mJobScheduler.cancel(JOB_ID);
+        mAlarmManager.cancel(mAlarmIntent);
     }
 
     /**
@@ -54,14 +50,6 @@ public class AlarmJobScheduler implements AlarmScheduler {
      */
     @Override
     public void schedule(long time) {
-        long triggerTime = time - System.currentTimeMillis();
-        if (triggerTime < 0) {
-            triggerTime = 0;
-        }
-
-        mJobScheduler.schedule(
-                mJobInfo.setMinimumLatency(triggerTime)
-                        .setOverrideDeadline(triggerTime)
-                        .build());
+        mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, mAlarmIntent);
     }
 }

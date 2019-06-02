@@ -1,7 +1,8 @@
-package com.jordantymburski.driftoff.di;
+package com.jordantymburski.driftoff.di.testing;
 
 import com.jordantymburski.driftoff.App;
-import com.jordantymburski.driftoff.domain.DomainProvider;
+import com.jordantymburski.driftoff.di.HomeActivityModule;
+import com.jordantymburski.driftoff.di.ReceiverModule;
 
 import javax.inject.Singleton;
 
@@ -12,12 +13,9 @@ import dagger.android.AndroidInjector;
 @Singleton
 @Component(modules = {
         AndroidInjectionModule.class,
-        AppModule.class,
-        DataModule.class,
-        ServiceModule.class,
+        MockDomainModule.class,
         ReceiverModule.class,
         HomeActivityModule.class
 })
-public interface AppComponent extends AndroidInjector<App> {
-    void inject(DomainProvider domainProvider);
+public interface MockAppComponent extends AndroidInjector<App> {
 }

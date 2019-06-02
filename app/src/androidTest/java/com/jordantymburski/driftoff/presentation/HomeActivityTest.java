@@ -19,6 +19,7 @@ import com.jordantymburski.driftoff.App;
 import com.jordantymburski.driftoff.R;
 import com.jordantymburski.driftoff.common.ContextProvider;
 import com.jordantymburski.driftoff.data.PreferenceStorage;
+import com.jordantymburski.driftoff.di.AppComponent;
 import com.jordantymburski.driftoff.domain.DomainProvider;
 import com.jordantymburski.driftoff.domain.model.AlarmInfo;
 
@@ -307,7 +308,8 @@ public class HomeActivityTest {
 
         // Force the fire from the back-end domain use case
         final DomainProvider domainProvider = new DomainProvider();
-        ((App) ContextProvider.get().getApplicationContext()).component().inject(domainProvider);
+        ((AppComponent) ((App) ContextProvider.get().getApplicationContext()).component())
+                .inject(domainProvider);
         domainProvider.stopAudio.execute();
         waitForUpdate();
 
@@ -329,7 +331,8 @@ public class HomeActivityTest {
 
         // Force the fire from the back-end domain use case
         final DomainProvider domainProvider = new DomainProvider();
-        ((App) ContextProvider.get().getApplicationContext()).component().inject(domainProvider);
+        ((AppComponent) ((App) ContextProvider.get().getApplicationContext()).component())
+                .inject(domainProvider);
         domainProvider.setInfo.setAlarm();
         waitForUpdate();
 

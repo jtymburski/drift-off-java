@@ -1,12 +1,16 @@
 package com.jordantymburski.driftoff.service;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import com.jordantymburski.driftoff.common.ContextProvider;
+import com.jordantymburski.driftoff.common.ResettableCountDownLatch;
 import com.jordantymburski.driftoff.common.ServiceProvider;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -15,81 +19,88 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.*;
 
 public class AlarmJobSchedulerTest {
-    /* ----------------------------------------------
-     * PRIVATE FUNCTIONS
-     * ---------------------------------------------- */
+    private final String ACTION_SIMULATED = "com.jordantymburski.driftoff.test.SIMULATED";
 
-    private void cleanUp(JobScheduler jobScheduler) {
-        jobScheduler.cancelAll();
-    }
+    /**
+     * The alarm scheduler instance to test with
+     */
+    private AlarmJobScheduler mAlarmScheduler;
 
-    private AlarmJobScheduler getAlarmScheduler(Context context, JobScheduler jobScheduler) {
-        return new AlarmJobScheduler(context, jobScheduler);
-    }
+    /**
+     * Resettable count down latch for synchronization
+     */
+    private final ResettableCountDownLatch mLock = new ResettableCountDownLatch(1);
+
+    /**
+     * Internal custom receiver
+     */
+    private final BroadcastReceiver mCustomReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() != null && intent.getAction().equals(ACTION_SIMULATED)) {
+                mLock.countDown();
+            }
+        }
+    };
 
     /* ----------------------------------------------
      * TEST CASES
      * ---------------------------------------------- */
 
-    @Test
-    public void schedule() {
+    @Before
+    public void setup() {
         final Context context = ContextProvider.get();
-        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
-        final AlarmJobScheduler alarmScheduler = getAlarmScheduler(context, jobScheduler);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ACTION_SIMULATED);
+        context.registerReceiver(mCustomReceiver, intentFilter);
 
-        // Schedule an alarm job trigger
-        long waitTime = TimeUnit.HOURS.toMillis(6);
-        alarmScheduler.schedule(new Date().getTime() + waitTime);
+        final Intent intent = new Intent(ACTION_SIMULATED);
+        mAlarmScheduler = new AlarmJobScheduler(
+                context, ServiceProvider.alarmManager(context), intent);
+    }
 
-        // Check to make sure it was scheduled
-        JobInfo jobInfo = jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID);
-        assertNotNull(jobInfo);
-        assertEquals(waitTime, jobInfo.getMinLatencyMillis());
-        assertEquals(waitTime, jobInfo.getMaxExecutionDelayMillis());
+    @After
+    public void cleanup() {
+        ContextProvider.get().unregisterReceiver(mCustomReceiver);
+    }
 
-        cleanUp(jobScheduler);
+
+    @Test
+    public void cancel() throws InterruptedException {
+        // Schedule it in a few seconds
+        mLock.reset();
+        mAlarmScheduler.schedule(new Date().getTime() + TimeUnit.SECONDS.toMillis(3));
+
+        // Sleep for a bit (less than the alarm above)
+        Thread.sleep(1500);
+
+        // Cancel it
+        mAlarmScheduler.cancel();
+
+        // Wait for the broadcast (should never happen)
+        assertFalse(mLock.await(8, TimeUnit.SECONDS));
     }
 
     @Test
-    public void cancel() {
-        final Context context = ContextProvider.get();
-        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
-        final AlarmJobScheduler alarmScheduler = getAlarmScheduler(context, jobScheduler);
+    public void schedule() throws InterruptedException {
+        // Schedule
+        mLock.reset();
+        mAlarmScheduler.schedule(new Date().getTime());
 
-        // Schedule an alarm job trigger
-        long waitTime = TimeUnit.HOURS.toMillis(6);
-        alarmScheduler.schedule(new Date().getTime() + waitTime);
-
-        // Check to make sure it was scheduled
-        JobInfo beforeCancelInfo = jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID);
-        assertNotNull(beforeCancelInfo);
-
-        // Then, cancel it
-        alarmScheduler.cancel();
-
-        // Check to make sure it was cancelled
-        JobInfo afterCancelInfo = jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID);
-        assertNull(afterCancelInfo);
-
-        cleanUp(jobScheduler);
+        // Wait for the broadcast
+        assertTrue(mLock.await(8, TimeUnit.SECONDS));
     }
 
     @Test
-    public void trigger() throws InterruptedException {
-        final Context context = ContextProvider.get();
-        final JobScheduler jobScheduler = ServiceProvider.jobScheduler(context);
-        final AlarmJobScheduler alarmScheduler = getAlarmScheduler(context, jobScheduler);
+    public void reschedule() throws InterruptedException {
+        // Schedule far away
+        mLock.reset();
+        mAlarmScheduler.schedule(new Date().getTime() + TimeUnit.HOURS.toMillis(1));
 
-        // Schedule an alarm job trigger now
-        alarmScheduler.schedule(new Date().getTime());
+        // Wait for a bit
+        assertFalse(mLock.await(5, TimeUnit.SECONDS));
 
-        // Sleep for a bit to wait for it to trigger
-        Thread.sleep(5000);
-
-        // Check to make sure it is no longer active
-        JobInfo afterWaitInfo = jobScheduler.getPendingJob(AlarmJobScheduler.JOB_ID);
-        assertNull(afterWaitInfo);
-
-        cleanUp(jobScheduler);
+        // Re-schedule it for now
+        schedule();
     }
 }

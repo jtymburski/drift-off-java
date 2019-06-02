@@ -1,18 +1,15 @@
 package com.jordantymburski.driftoff.common;
 
-import android.app.job.JobScheduler;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.media.AudioManager;
 
 public class ServiceProvider {
-    public static AudioManager audioManager(Context context) {
-        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    public static AlarmManager alarmManager(Context context) {
+        return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
-    public static JobScheduler jobScheduler(Context context) {
-        final JobScheduler jobScheduler
-                = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.cancelAll();
-        return jobScheduler;
+    public static AudioManager audioManager(Context context) {
+        return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 }

@@ -1,13 +1,13 @@
 package com.jordantymburski.driftoff.di;
 
-import com.jordantymburski.driftoff.presentation.HomeActivity;
+import com.jordantymburski.driftoff.service.AlarmReceiver;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 
 @SuppressWarnings("unused")
 @Module
-public abstract class HomeActivityModule {
+public abstract class ReceiverModule {
     @ContributesAndroidInjector
-    abstract HomeActivity contributeHomeActivity();
+    abstract AlarmReceiver contributeAlarmReceiver();
 }
