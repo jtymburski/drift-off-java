@@ -1,10 +1,17 @@
-# Drift Off for Android
+<div align=center>
+<img src="exports/driftoff.png" width="450px">
+</div>
+
+
+
+## Description
 
 An Android app that will stop all playing media on the phone at a set time
 
 This project was inspired by wanting to play music as you relax late at night and have it turn off automatically after falling asleep. Unfortunately, the native Android alarm apps have no capability to do this.
 
-<img src="https://img.shields.io/badge/android-6.0%2B-blue.svg" />
+<a href="https://source.android.com/setup/start/build-numbers" alt="Android Build">
+    <img src="https://img.shields.io/badge/android-6.0%2B-blue.svg" /></a>
 
 ## Screenshots
 
